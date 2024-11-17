@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // Primero, cargar el header y el footer
+  const cache = {}; // Objeto para almacenar las páginas cargadas
+
+  // Primero, cargar el header, main y footer
   Promise.all([
     loadHTML("views/header.html", "header"),
     loadHTML("views/inicio.html", "main"),
@@ -16,24 +18,30 @@ document.addEventListener("DOMContentLoaded", function () {
           const view = link.getAttribute("data-view");
 
           if (view) {
-            // Cargar el contenido del archivo asociado al enlace
-            fetch(view)
-              .then((response) => {
-                if (!response.ok) throw new Error("Pagina no encontrada.");
-                return response.text();
-              })
-              .then((html) => {
-                content.innerHTML = html; // Actualizar el contenido del main
-              })
-              .catch((error) => {
-                content.innerHTML = `<p>Error: ${error.message}</p>`;
-              });
+            // Si la página ya está en la caché, usarla
+            if (cache[view]) {
+              content.innerHTML = cache[view]; // Actualizar el contenido desde la caché
+            } else {
+              // Si no está en la caché, cargar del servidor
+              fetch(view)
+                .then((response) => {
+                  if (!response.ok) throw new Error("Pagina no encontrada.");
+                  return response.text();
+                })
+                .then((html) => {
+                  cache[view] = html; // Guardar en la caché
+                  content.innerHTML = html; // Actualizar el contenido del main
+                })
+                .catch((error) => {
+                  content.innerHTML = `<p>Error: ${error.message}</p>`;
+                });
+            }
           }
         });
       });
     })
     .catch((error) => {
-      console.error("Error al cargar el header o footer:", error.message);
+      console.error("Error al cargar el header, main o footer:", error.message);
     });
 });
 
