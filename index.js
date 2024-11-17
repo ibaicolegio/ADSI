@@ -9,12 +9,20 @@ document.addEventListener("DOMContentLoaded", function () {
   ])
     .then(() => {
       // Después de cargar el header y footer, agregar eventos a los enlaces
-      const links = document.querySelectorAll("header a");
+      const links = document.querySelectorAll("header .nav-link");
       const content = document.getElementById("main");
 
       links.forEach((link) => {
         link.addEventListener("click", function (event) {
           event.preventDefault(); // Evitar que el enlace recargue la página
+
+          // Gestionar las clases de énfasis
+          links.forEach((l) => l.classList.remove("link-body-emphasis")); // Eliminar clase de énfasis
+          links.forEach((l) => l.classList.add("link-secondary")); // Añadir link-secondary a los demás enlaces
+
+          link.classList.add("link-body-emphasis"); // Añadir link-body-emphasis al enlace clickeado
+          link.classList.remove("link-secondary"); // Eliminar link-secondary del enlace clickeado
+
           const view = link.getAttribute("data-view");
 
           if (view) {
@@ -39,11 +47,27 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         });
       });
+
+      // Después de que todo se haya cargado, cargamos el segundo script
+      loadScript('prueba.js').then(() => {
+        console.log('El segundo script se ha cargado y ejecutado.');
+      });
     })
     .catch((error) => {
       console.error("Error al cargar el header, main o footer:", error.message);
     });
 });
+
+// Función para cargar un archivo JavaScript de forma asíncrona
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = () => resolve();
+    script.onerror = (err) => reject(new Error('Failed to load script: ' + src));
+    document.head.appendChild(script);
+  });
+}
 
 function loadHTML(file, elementId) {
   return fetch(file)
