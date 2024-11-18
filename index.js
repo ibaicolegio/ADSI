@@ -26,7 +26,7 @@ function loadPaginaPrincipal() {
         // Este bloque solo se ejecuta después de que todo se ha cargado
         const loginLinks = document.querySelectorAll("header .nav-link");
         const content = document.getElementById("main");
-
+        buscar();
 
         // Manejar navegación en el header de login
         loginLinks.forEach((link) => {
@@ -58,6 +58,7 @@ function loadPaginaPrincipal() {
                                     if(view==="views/login.html"){
                                         console.log(view);
                                         login();
+                                        
                                     }
                                     
                                 })
@@ -189,4 +190,35 @@ function login() {
     } else {
         console.error("Formulario de login no encontrado. Verifica el archivo login.html");
     }
+}
+
+ function buscar(){
+    const searchForm = document.getElementById("searchForm");
+    if (searchForm) {
+        searchForm.addEventListener("submit", function (event) {
+            event.preventDefault(); // Evitar la recarga de la página al enviar el formulario
+
+            // Obtener los valores seleccionados
+            const gender = document.getElementById("gender").value;
+            const minAge = document.getElementById("minAge").value;
+            const maxAge = document.getElementById("maxAge").value;
+            const city = document.getElementById("city").value;
+
+            // Filtrar o realizar búsqueda con estos valores
+            const searchResults = performSearch( minAge, maxAge, city);
+
+            // Mostrar los resultados en el contenedor principal
+            const content = document.getElementById("main");
+            content.innerHTML = searchResults;
+        });
+        }
+    };
+    
+    function performSearch(minAge, maxAge, city) {
+    // Aquí puedes realizar tu búsqueda o filtros basados en los datos.
+    return `<h2>Resultados de la búsqueda</h2>
+       
+            <p>Edad mínima: ${minAge}</p>
+            <p>Edad máxima: ${maxAge}</p>
+            <p>Ciudad: ${city}</p>`;
 }
