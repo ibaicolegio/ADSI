@@ -24,28 +24,9 @@ function loadPaginaPrincipal() {
         loadHTML("views/footer.html", "footer")
     ]).then(() => {
         // Este bloque solo se ejecuta después de que todo se ha cargado
-        const loginForm = document.getElementById("loginForm");
         const loginLinks = document.querySelectorAll("header .nav-link");
         const content = document.getElementById("main");
 
-        if (loginForm) {
-            // Manejar el envío del formulario de login
-            loginForm.addEventListener("submit", function (event) {
-                event.preventDefault();
-
-                const username = document.getElementById("username").value;
-                const password = document.getElementById("password").value;
-
-                // Validación simple
-                if (username === "admin" && password === "1234") {
-                    sessionStorage.setItem("userLoggedIn", username);
-                    alert("Login exitoso");
-                    loadMainPage(); // Cambiar a la página principal
-                } else {
-                    alert("Usuario o contraseña incorrectos.");
-                }
-            });
-        }
 
         // Manejar navegación en el header de login
         loginLinks.forEach((link) => {
