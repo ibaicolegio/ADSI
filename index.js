@@ -50,6 +50,16 @@ async function loadAndStoreData() {
 
         // Almacenar objetos en sessionStorage
         sessionStorage.setItem('aficiones', JSON.stringify(aficionesData));
+        
+        // Cargar el archivo usuAfi.json
+        const usuAfiResponse = await fetch('json/usuAfi.json');
+        if (!usuAfiResponse.ok) {
+            throw new Error(`Error al cargar el archivo usuarios.json: ${usuAfiResponse.status}`);
+        }
+        const usuAfiData = await usuAfiResponse.json();
+
+        // Almacenar usuAfi en sessionStorage
+        sessionStorage.setItem('usuAfi', JSON.stringify(usuAfiData));
 
         // Mostrar en consola los datos cargados para verificar
         console.log('Usuarios cargados:', usuariosData);
