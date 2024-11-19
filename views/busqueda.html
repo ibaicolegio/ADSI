@@ -5,8 +5,8 @@
     <form id="searchForm" class="row g-3">
         <!-- Campo de Género -->
         <div class="col-md-4">
-            <label for="gender" class="form-label">Género</label>
-            <select id="gender" class="form-select" required>
+            <label for="genero" class="form-label">Género</label>
+            <select id="genero" class="form-select" required>
                 <option value="" selected>Seleccionar...</option>
                 <option value="mujerHombre">Soy mujer y busco hombre</option>
                 <option value="mujerMujer">Soy mujer y busco mujer</option>
@@ -31,11 +31,11 @@
 
         <!-- Campo de Ciudad -->
         <div class="col-md-4">
-            <label for="city" class="form-label">Ciudad</label>
-            <select id="city" class="form-select" required>
+            <label for="ciudad" class="form-label">Ciudad</label>
+            <select id="ciudad" class="form-select" required>
                 <option value="" selected>Seleccionar...</option>
-                <option value="bilbao">Bilbao</option>
-                <option value="vitoria">Vitoria</option>
+                <option value="bilbo">Bilbo</option>
+                <option value="gasteiz">Gasteiz</option>
                 <option value="donostia">Donostia</option>
             </select>
         </div>
@@ -46,5 +46,6 @@
             <button type="reset" class="btn btn-secondary">Limpiar</button>
         </div>
     </form>
-    <br/>
+     <div id="searchResultsContainer" class="row"></div>
+    <br/>   
 </div>

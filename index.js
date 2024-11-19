@@ -91,7 +91,6 @@ function loadPaginaPrincipal() {
         // Este bloque solo se ejecuta después de que todo se ha cargado
         const loginLinks = document.querySelectorAll("header .nav-link");
         const content = document.getElementById("main");
-        buscar();
         
         // Manejar navegación en el header de login
         loginLinks.forEach((link) => {
@@ -272,69 +271,6 @@ function login() {
     }
 }
 
-function buscar() {
-    // Obtener el formulario de búsqueda y el contenedor de resultados
-    const searchForm = document.getElementById("searchForm");
-    const searchResultsContainer = document.getElementById("searchResultsContainer");
-
-    // Verificar si el formulario existe
-    if (searchForm) {
-        // Manejar el evento de envío del formulario
-        searchForm.addEventListener("submit", function (event) {
-            event.preventDefault(); // Prevenir la recarga de la página
-
-            // Obtener los valores del formulario
-            const gender = document.getElementById("gender").value;
-            const minAge = parseInt(document.getElementById("minAge").value, 10);
-            const maxAge = parseInt(document.getElementById("maxAge").value, 10);
-            const city = document.getElementById("city").value;
-
-            // Recuperar la lista de usuarios (simulación de datos en sessionStorage)
-            const users = JSON.parse(sessionStorage.getItem("usuarios")) || [];
-
-            // Filtrar los usuarios según los criterios
-            const filteredUsers = users.filter(user => {
-                return (!gender || user.gender === gender) &&
-                       (!isNaN(minAge) && user.age >= minAge) &&
-                       (!isNaN(maxAge) && user.age <= maxAge) &&
-                       (!city || user.city.toLowerCase() === city.toLowerCase());
-            });
-
-            // Limpiar resultados previos
-            searchResultsContainer.innerHTML = "";
-
-            // Mostrar los resultados o un mensaje si no hay coincidencias
-            if (filteredUsers.length > 0) {
-                filteredUsers.forEach(user => {
-                    const userCard = document.createElement("div");
-                    userCard.classList.add("col-12", "col-md-6", "mb-4");
-
-                    userCard.innerHTML = `
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">${user.name}</h5>
-                                <p class="card-text">Edad: ${user.age}</p>
-                                <p class="card-text">Ciudad: ${user.city}</p>
-                                <a href="#" class="btn btn-primary">Ver perfil</a>
-                            </div>
-                        </div>
-                    `;
-                    searchResultsContainer.appendChild(userCard);
-                });
-            } else {
-                searchResultsContainer.innerHTML = `
-                    <div class="alert alert-warning text-center" role="alert">
-                        No se encontraron resultados que coincidan con los criterios de búsqueda.
-                    </div>
-                `;
-            }
-           
-        });
-    } else {
-        console.error("Formulario de búsqueda no encontrado.");
-    }
-}
-
 function cargarLikes() {
     // Obtener el email del usuario actualmente logueado desde sessionStorage
     const loggedInUser = JSON.parse(sessionStorage.getItem('userLoggedIn')) || {}; // Asegúrate de que este valor esté almacenado en sessionStorage
@@ -404,5 +340,86 @@ function cargarLikes() {
                 No hay "Me Gusta" registrados.
             </div>
         `;
+    }
+}
+
+function buscar() {
+    // Obtener el formulario de búsqueda y el contenedor de resultados
+    const searchForm = document.getElementById("searchForm");
+    const searchResultsContainer = document.getElementById("searchResultsContainer");
+
+    // Verificar si el formulario existe
+    if (searchForm) {
+        // Manejar el evento de envío del formulario
+        searchForm.addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevenir la recarga de la página
+
+            // Obtener los valores del formulario
+            const genero = document.getElementById("genero").value;
+            const minAge = parseInt(document.getElementById("minAge").value, 10);
+            const maxAge = parseInt(document.getElementById("maxAge").value, 10);
+            const ciudad = document.getElementById("ciudad").value.toLowerCase();
+
+            // Recuperar la lista de usuarios desde sessionStorage
+            const users = JSON.parse(sessionStorage.getItem("usuarios")) || [];
+            
+            let generoValue = ""; // Convertir las opciones del formulario a "M" o "H"
+            switch (genero) {
+                case "mujerHombre":
+                case "hombreHombre":
+                       generoValue = "H";
+                       break;
+                case "hombreMujer":
+                case "mujerMujer":
+                       generoValue = "M";
+                       break;
+                case "mujerAmbos":
+                case "hombreAmbos":
+                       generoValue = ["H","M"];
+                       break;
+            }
+            
+            // Filtrar los usuarios según los criterios
+            const filteredUsers = users.filter(user => {
+                const userCiudad = user.ciudad ? user.ciudad.toLowerCase() : "";
+                    return (
+                        (!genero || generoValue.includes(user.genero)) &&
+                        (!isNaN(minAge) && user.edad >= minAge) &&
+                        (!isNaN(maxAge) && user.edad <= maxAge) &&
+                        (!ciudad || userCiudad === ciudad)
+                    );
+            });
+
+            // Limpiar resultados previos
+            searchResultsContainer.innerHTML = "";
+
+            // Mostrar los resultados o un mensaje si no hay coincidencias
+            if (filteredUsers.length > 0) {
+                filteredUsers.forEach(user => {
+                    const userCard = document.createElement("div");
+                    userCard.classList.add("col-12", "col-md-6", "mb-4");
+
+                    userCard.innerHTML = `
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">${user.nombre}</h5>
+                                <p class="card-text">Edad: ${user.edad}</p>
+                                <p class="card-text">Ciudad: ${user.ciudad}</p>
+                                <a href="#" class="btn btn-primary">Ver perfil</a>
+                            </div>
+                        </div>
+                    `;
+                    searchResultsContainer.appendChild(userCard);
+                });
+            } else {
+                searchResultsContainer.innerHTML = `
+                    <div class="alert alert-warning text-center" role="alert">
+                        No se encontraron resultados que coincidan con los criterios de búsqueda.
+                    </div>
+                `;
+            }
+        });
+    } else {
+        console.error("Formulario de búsqueda no encontrado.");
     }
 }
