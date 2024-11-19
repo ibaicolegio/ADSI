@@ -1,7 +1,7 @@
 // Objeto para almacenar las páginas cargadas
 const cache = {};
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
 
 
     // Verificar si el usuario está autenticado
@@ -14,7 +14,52 @@ document.addEventListener("DOMContentLoaded", function () {
         // Mostrar el contenido principal con el header general
         loadPaginaUsuario();
     }
+    
+    await loadAndStoreData();
+    
 });
+
+async function loadAndStoreData() {
+    try {
+        // Cargar el archivo usuarios.json
+        const usuariosResponse = await fetch('json/usuarios.json');
+        if (!usuariosResponse.ok) {
+            throw new Error(`Error al cargar el archivo usuarios.json: ${usuariosResponse.status}`);
+        }
+        const usuariosData = await usuariosResponse.json();
+
+        // Almacenar usuarios en sessionStorage
+        sessionStorage.setItem('usuarios', JSON.stringify(usuariosData));
+
+        // Cargar el archivo objetos.json
+        const objetosResponse = await fetch('json/aficiones.json');
+        if (!objetosResponse.ok) {
+            throw new Error(`Error al cargar el archivo objetos.json: ${objetosResponse.status}`);
+        }
+        const objetosData = await objetosResponse.json();
+
+        // Almacenar objetos en sessionStorage
+        sessionStorage.setItem('aficiones', JSON.stringify(objetosData));
+
+        // Mostrar en consola los datos cargados para verificar
+        console.log('Usuarios cargados:', usuariosData);
+        console.log('Objetos cargados:', objetosData);
+
+        // Opcional: Mostrar los datos en el DOM
+        const output = document.getElementById('output');
+        if (output) {
+            output.textContent = `Usuarios cargados:\n${JSON.stringify(usuariosData, null, 2)}\n\nObjetos cargados:\n${JSON.stringify(objetosData, null, 2)}`;
+        }
+    } catch (error) {
+        console.error('Error al cargar datos:', error.message);
+
+        // Mostrar error en el DOM si existe el contenedor
+        const output = document.getElementById('output');
+        if (output) {
+            output.textContent = `Error: ${error.message}`;
+        }
+    }
+}
 
 // Función para cargar la página de login con su propio header
 function loadPaginaPrincipal() {
@@ -177,9 +222,14 @@ function login() {
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
 
-            // Validación simple
-            if (username === "admin" && password === "1234") {
-                sessionStorage.setItem("userLoggedIn", username);
+            // Recuperar los usuarios almacenados en sessionStorage
+            const users = JSON.parse(sessionStorage.getItem("usuarios"));
+
+            // Comprobar si existe un usuario con el correo y la contraseña
+            const user = users.find(u => u.email === username && u.password === password);
+
+            if (user) {
+                sessionStorage.setItem("userLoggedIn", JSON.stringify(user.nombre));
                 alert("Login exitoso");
                 // Recargar la página
                 location.reload();
@@ -191,6 +241,7 @@ function login() {
         console.error("Formulario de login no encontrado. Verifica el archivo login.html");
     }
 }
+
 
  function buscar(){
     const searchForm = document.getElementById("searchForm");

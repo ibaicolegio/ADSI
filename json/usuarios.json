@@ -1,0 +1,178 @@
+[
+    {
+        "email": "ana@adsi.com",
+        "password": "1234",
+        "nombre": "Ana",
+        "ciudad": "Gasteiz",
+        "edad": 25,
+        "genero": "M",
+        "latitud": 4.56,
+        "longitud": 7.89,
+        "foto": null
+    },
+    {
+        "email": "borja@adsi.com",
+        "password": "12345",
+        "nombre": "Borja",
+        "ciudad": "Bilbo",
+        "edad": 34,
+        "genero": "H",
+        "latitud": 3.5,
+        "longitud": 7.6,
+        "foto": null
+    },
+    {
+        "email": "maria@adsi.com",
+        "password": "abcd1234",
+        "nombre": "Maria",
+        "ciudad": "Donostia",
+        "edad": 29,
+        "genero": "M",
+        "latitud": 40.41,
+        "longitud": -3.7,
+        "foto": null
+    },
+    {
+        "email": "juan@adsi.com",
+        "password": "password1",
+        "nombre": "Juan",
+        "ciudad": "Gasteiz",
+        "edad": 27,
+        "genero": "H",
+        "latitud": 37.39,
+        "longitud": -5.98,
+        "foto": null
+    },
+    {
+        "email": "laura@adsi.com",
+        "password": "qwerty123",
+        "nombre": "Laura",
+        "ciudad": "Bilbo",
+        "edad": 32,
+        "genero": "M",
+        "latitud": 41.38,
+        "longitud": 2.19,
+        "foto": null
+    },
+    {
+        "email": "pedro@adsi.com",
+        "password": "12345abcd",
+        "nombre": "Pedro",
+        "ciudad": "Donostia",
+        "edad": 30,
+        "genero": "H",
+        "latitud": 39.47,
+        "longitud": -0.37,
+        "foto": null
+    },
+    {
+        "email": "sofia@adsi.com",
+        "password": "5678abcd",
+        "nombre": "Sofia",
+        "ciudad": "Bilbo",
+        "edad": 26,
+        "genero": "M",
+        "latitud": 43.26,
+        "longitud": -2.93,
+        "foto": null
+    },
+    {
+        "email": "luis@adsi.com",
+        "password": "7890abcd",
+        "nombre": "Luis",
+        "ciudad": "Gasteiz",
+        "edad": 33,
+        "genero": "H",
+        "latitud": 41.65,
+        "longitud": -0.88,
+        "foto": null
+    },
+    {
+        "email": "isabel@adsi.com",
+        "password": "qwerty456",
+        "nombre": "Isabel",
+        "ciudad": "Donostia",
+        "edad": 28,
+        "genero": "M",
+        "latitud": 36.72,
+        "longitud": -4.42,
+        "foto": null
+    },
+    {
+        "email": "alfonso@adsi.com",
+        "password": "alfonso123",
+        "nombre": "Alfonso",
+        "ciudad": "Bilbo",
+        "edad": 40,
+        "genero": "H",
+        "latitud": 37.17,
+        "longitud": -3.6,
+        "foto": null
+    },
+    {
+        "email": "carmen@adsi.com",
+        "password": "9876qwerty",
+        "nombre": "Carmen",
+        "ciudad": "Gasteiz",
+        "edad": 24,
+        "genero": "M",
+        "latitud": 38.34,
+        "longitud": -0.48,
+        "foto": null
+    },
+    {
+        "email": "jose@adsi.com",
+        "password": "jose1234",
+        "nombre": "Jose",
+        "ciudad": "Bilbo",
+        "edad": 38,
+        "genero": "H",
+        "latitud": 39.86,
+        "longitud": -4.03,
+        "foto": null
+    },
+    {
+        "email": "elena@adsi.com",
+        "password": "elena4321",
+        "nombre": "Elena",
+        "ciudad": "Donostia",
+        "edad": 31,
+        "genero": "M",
+        "latitud": 41.65,
+        "longitud": -4.73,
+        "foto": null
+    },
+    {
+        "email": "manuel@adsi.com",
+        "password": "manuel123",
+        "nombre": "Manuel",
+        "ciudad": "Gasteiz",
+        "edad": 35,
+        "genero": "H",
+        "latitud": 37.98,
+        "longitud": -1.13,
+        "foto": null
+    },
+    {
+        "email": "marta@adsi.com",
+        "password": "marta",
+        "nombre": "Marta",
+        "ciudad": "Bilbo",
+        "edad": 26,
+        "genero": "M",
+        "latitud": 39.47,
+        "longitud": -0.37,
+        "foto": null
+    },
+    {
+        "email": "danel@adsi.com",
+        "password": "danel1234",
+        "nombre": "Danel",
+        "ciudad": "Donostia",
+        "edad": 35,
+        "genero": "H",
+        "latitud": 37.98,
+        "longitud": -1.13,
+        "foto": null
+    }
+]

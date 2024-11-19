@@ -1,0 +1,62 @@
+[
+    {
+        "idAficion": "1",
+        "nombreAficion": "caminar"
+    },
+    {
+        "idAficion": "2",
+        "nombreAficion": "ajedrez"
+    },
+    {
+        "idAficion": "3",
+        "nombreAficion": "leer"
+    },
+    {
+        "idAficion": "4",
+        "nombreAficion": "pintar"
+    },
+    {
+        "idAficion": "5",
+        "nombreAficion": "nadar"
+    },
+    {
+        "idAficion": "6",
+        "nombreAficion": "fotografía"
+    },
+    {
+        "idAficion": "7",
+        "nombreAficion": "correr"
+    },
+    {
+        "idAficion": "8",
+        "nombreAficion": "música"
+    },
+    {
+        "idAficion": "9",
+        "nombreAficion": "ciclismo"
+    },
+    {
+        "idAficion": "10",
+        "nombreAficion": "bailar"
+    },
+    {
+        "idAficion": "11",
+        "nombreAficion": "cocinar"
+    },
+    {
+        "idAficion": "12",
+        "nombreAficion": "viajar"
+    },
+    {
+        "idAficion": "13",
+        "nombreAficion": "jardinería"
+    },
+    {
+        "idAficion": "14",
+        "nombreAficion": "escribir"
+    },
+    {
+        "idAficion": "15",
+        "nombreAficion": "videojuegos"
+    }
+]
