@@ -41,7 +41,7 @@ async function loadAndStoreData() {
         // Almacenar meGusta en sessionStorage
         sessionStorage.setItem('meGusta', JSON.stringify(meGustaData));
 
-        // Cargar el archivo objetos.json
+        // Cargar el archivo aficiones.json
         const aficionesResponse = await fetch('json/aficiones.json');
         if (!aficionesResponse.ok) {
             throw new Error(`Error al cargar el archivo objetos.json: ${aficionesResponse.status}`);
@@ -53,12 +53,12 @@ async function loadAndStoreData() {
 
         // Mostrar en consola los datos cargados para verificar
         console.log('Usuarios cargados:', usuariosData);
-        console.log('Objetos cargados:', objetosData);
+        console.log('aficiones cargados:', aficionesData);
 
         // Opcional: Mostrar los datos en el DOM
         const output = document.getElementById('output');
         if (output) {
-            output.textContent = `Usuarios cargados:\n${JSON.stringify(usuariosData, null, 2)}\n\nObjetos cargados:\n${JSON.stringify(objetosData, null, 2)}`;
+            output.textContent = `Usuarios cargados:\n${JSON.stringify(usuariosData, null, 2)}\n\nObjetos cargados:\n${JSON.stringify(aficionesData, null, 2)}`;
         }
     } catch (error) {
         console.error('Error al cargar datos:', error.message);
@@ -82,7 +82,7 @@ function loadPaginaPrincipal() {
         const loginLinks = document.querySelectorAll("header .nav-link");
         const content = document.getElementById("main");
         buscar();
-
+        
         // Manejar navegación en el header de login
         loginLinks.forEach((link) => {
             link.addEventListener("click", function (event) {
@@ -100,6 +100,7 @@ function loadPaginaPrincipal() {
                 if (view) {
                     if (cache[view]) {
                         content.innerHTML = cache[view];
+                        
                     } else {
                         fetch(view)
                                 .then((response) => {
@@ -113,9 +114,11 @@ function loadPaginaPrincipal() {
                                     if (view === "views/login.html") {
                                         console.log(view);
                                         login();
-
                                     }
-
+                                    if (view === "views/busqueda.html") {
+                                        console.log(view);
+                                        buscar();
+                                    }
                                 })
                                 .catch((error) => {
                                     content.innerHTML = `<p>Error: ${error.message}</p>`;
@@ -131,7 +134,7 @@ function loadPaginaUsuario() {
     Promise.all([
         loadHTML("views/header.html", "header"),
         loadHTML("views/inicio.html", "main"),
-        loadHTML("views/footer.html", "footer"),
+        loadHTML("views/footer.html", "footer")
     ])
             .then(() => {
                 const links = document.querySelectorAll("header .nav-link");
@@ -259,37 +262,67 @@ function login() {
     }
 }
 
-
 function buscar() {
+    // Obtener el formulario de búsqueda y el contenedor de resultados
     const searchForm = document.getElementById("searchForm");
-    if (searchForm) {
-        searchForm.addEventListener("submit", function (event) {
-            event.preventDefault(); // Evitar la recarga de la página al enviar el formulario
+    const searchResultsContainer = document.getElementById("searchResultsContainer");
 
-            // Obtener los valores seleccionados
+    // Verificar si el formulario existe
+    if (searchForm) {
+        // Manejar el evento de envío del formulario
+        searchForm.addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevenir la recarga de la página
+
+            // Obtener los valores del formulario
             const gender = document.getElementById("gender").value;
-            const minAge = document.getElementById("minAge").value;
-            const maxAge = document.getElementById("maxAge").value;
+            const minAge = parseInt(document.getElementById("minAge").value, 10);
+            const maxAge = parseInt(document.getElementById("maxAge").value, 10);
             const city = document.getElementById("city").value;
 
-            // Filtrar o realizar búsqueda con estos valores
-            const searchResults = performSearch(minAge, maxAge, city);
+            // Recuperar la lista de usuarios (simulación de datos en sessionStorage)
+            const users = JSON.parse(sessionStorage.getItem("usuarios")) || [];
 
-            // Mostrar los resultados en el contenedor principal
-            const content = document.getElementById("main");
-            content.innerHTML = searchResults;
+            // Filtrar los usuarios según los criterios
+            const filteredUsers = users.filter(user => {
+                return (!gender || user.gender === gender) &&
+                       (!isNaN(minAge) && user.age >= minAge) &&
+                       (!isNaN(maxAge) && user.age <= maxAge) &&
+                       (!city || user.city.toLowerCase() === city.toLowerCase());
+            });
+
+            // Limpiar resultados previos
+            searchResultsContainer.innerHTML = "";
+
+            // Mostrar los resultados o un mensaje si no hay coincidencias
+            if (filteredUsers.length > 0) {
+                filteredUsers.forEach(user => {
+                    const userCard = document.createElement("div");
+                    userCard.classList.add("col-12", "col-md-6", "mb-4");
+
+                    userCard.innerHTML = `
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">${user.name}</h5>
+                                <p class="card-text">Edad: ${user.age}</p>
+                                <p class="card-text">Ciudad: ${user.city}</p>
+                                <a href="#" class="btn btn-primary">Ver perfil</a>
+                            </div>
+                        </div>
+                    `;
+                    searchResultsContainer.appendChild(userCard);
+                });
+            } else {
+                searchResultsContainer.innerHTML = `
+                    <div class="alert alert-warning text-center" role="alert">
+                        No se encontraron resultados que coincidan con los criterios de búsqueda.
+                    </div>
+                `;
+            }
+           
         });
+    } else {
+        console.error("Formulario de búsqueda no encontrado.");
     }
-}
-;
-
-function performSearch(minAge, maxAge, city) {
-    // Aquí puedes realizar tu búsqueda o filtros basados en los datos.
-    return `<h2>Resultados de la búsqueda</h2>
-       
-            <p>Edad mínima: ${minAge}</p>
-            <p>Edad máxima: ${maxAge}</p>
-            <p>Ciudad: ${city}</p>`;
 }
 
 function cargarLikes() {
