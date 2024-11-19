@@ -14,9 +14,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         // Mostrar el contenido principal con el header general
         loadPaginaUsuario();
     }
-    
+
     await loadAndStoreData();
-    
+
 });
 
 async function loadAndStoreData() {
@@ -31,15 +31,25 @@ async function loadAndStoreData() {
         // Almacenar usuarios en sessionStorage
         sessionStorage.setItem('usuarios', JSON.stringify(usuariosData));
 
-        // Cargar el archivo objetos.json
-        const objetosResponse = await fetch('json/aficiones.json');
-        if (!objetosResponse.ok) {
-            throw new Error(`Error al cargar el archivo objetos.json: ${objetosResponse.status}`);
+        // Cargar el archivo meGusta.json
+        const meGustaResponse = await fetch('json/meGusta.json');
+        if (!meGustaResponse.ok) {
+            throw new Error(`Error al cargar el archivo usuarios.json: ${meGustaResponse.status}`);
         }
-        const objetosData = await objetosResponse.json();
+        const meGustaData = await meGustaResponse.json();
+
+        // Almacenar meGusta en sessionStorage
+        sessionStorage.setItem('meGusta', JSON.stringify(meGustaData));
+
+        // Cargar el archivo objetos.json
+        const aficionesResponse = await fetch('json/aficiones.json');
+        if (!aficionesResponse.ok) {
+            throw new Error(`Error al cargar el archivo objetos.json: ${aficionesResponse.status}`);
+        }
+        const aficionesData = await aficionesResponse.json();
 
         // Almacenar objetos en sessionStorage
-        sessionStorage.setItem('aficiones', JSON.stringify(objetosData));
+        sessionStorage.setItem('aficiones', JSON.stringify(aficionesData));
 
         // Mostrar en consola los datos cargados para verificar
         console.log('Usuarios cargados:', usuariosData);
@@ -100,12 +110,12 @@ function loadPaginaPrincipal() {
                                 .then((html) => {
                                     cache[view] = html;
                                     content.innerHTML = html;
-                                    if(view==="views/login.html"){
+                                    if (view === "views/login.html") {
                                         console.log(view);
                                         login();
-                                        
+
                                     }
-                                    
+
                                 })
                                 .catch((error) => {
                                     content.innerHTML = `<p>Error: ${error.message}</p>`;
@@ -129,9 +139,9 @@ function loadPaginaUsuario() {
 
                 // Mostrar saludo con el nombre del usuario
                 const welcomeMessage = document.getElementById("welcomeMessage");
-                const loggedInUser = sessionStorage.getItem("userLoggedIn");
+                const loggedInUser = JSON.parse(sessionStorage.getItem("userLoggedIn"));
                 if (loggedInUser) {
-                    welcomeMessage.textContent = `Hola, ${loggedInUser}`;
+                    welcomeMessage.textContent = `Hola, ${loggedInUser.nombre}`;
                 }
 
                 // Agregar funcionalidad al botón de logout
@@ -161,6 +171,10 @@ function loadPaginaUsuario() {
                         if (view) {
                             if (cache[view]) {
                                 content.innerHTML = cache[view];
+                                if (view === "views/verLikes.html") {
+                                    console.log(view);
+                                    cargarLikes();
+                                }
                             } else {
                                 fetch(view)
                                         .then((response) => {
@@ -171,7 +185,10 @@ function loadPaginaUsuario() {
                                         .then((html) => {
                                             cache[view] = html;
                                             content.innerHTML = html;
-
+                                            if (view === "views/verLikes.html") {
+                                                console.log(view);
+                                                cargarLikes();
+                                            }
                                         })
                                         .catch((error) => {
                                             content.innerHTML = `<p>Error: ${error.message}</p>`;
@@ -229,7 +246,7 @@ function login() {
             const user = users.find(u => u.email === username && u.password === password);
 
             if (user) {
-                sessionStorage.setItem("userLoggedIn", JSON.stringify(user.nombre));
+                sessionStorage.setItem("userLoggedIn", JSON.stringify(user));
                 alert("Login exitoso");
                 // Recargar la página
                 location.reload();
@@ -243,7 +260,7 @@ function login() {
 }
 
 
- function buscar(){
+function buscar() {
     const searchForm = document.getElementById("searchForm");
     if (searchForm) {
         searchForm.addEventListener("submit", function (event) {
@@ -256,20 +273,93 @@ function login() {
             const city = document.getElementById("city").value;
 
             // Filtrar o realizar búsqueda con estos valores
-            const searchResults = performSearch( minAge, maxAge, city);
+            const searchResults = performSearch(minAge, maxAge, city);
 
             // Mostrar los resultados en el contenedor principal
             const content = document.getElementById("main");
             content.innerHTML = searchResults;
         });
-        }
-    };
-    
-    function performSearch(minAge, maxAge, city) {
+    }
+}
+;
+
+function performSearch(minAge, maxAge, city) {
     // Aquí puedes realizar tu búsqueda o filtros basados en los datos.
     return `<h2>Resultados de la búsqueda</h2>
        
             <p>Edad mínima: ${minAge}</p>
             <p>Edad máxima: ${maxAge}</p>
             <p>Ciudad: ${city}</p>`;
+}
+
+function cargarLikes() {
+    // Obtener el email del usuario actualmente logueado desde sessionStorage
+    const loggedInUser = JSON.parse(sessionStorage.getItem('userLoggedIn')) || {}; // Asegúrate de que este valor esté almacenado en sessionStorage
+    const likes = JSON.parse(sessionStorage.getItem('meGusta')) || []; // Si no hay datos, usar un array vacío
+
+    // Obtener el contenedor donde se mostrarán los likes
+    const likesContainer = document.getElementById('likesContainer');
+
+    // Verificar si existen "me gusta" guardados
+    if (likes.length > 0) {
+        // Limpiar el contenedor en caso de que haya contenido previo
+        likesContainer.innerHTML = '';
+
+        // Filtrar los "me gusta" donde el email2 coincida con el usuario logueado o donde el usuario esté en email1
+        const filteredLikes = likes.filter(like => like.email2 === loggedInUser.email || like.email1 === loggedInUser.email);
+
+        // Verificar si hay "me gusta" filtrados
+        if (filteredLikes.length > 0) {
+            // Recorrer los "me gusta" filtrados y mostrarlos en tarjetas
+            filteredLikes.forEach(like => {
+                // Comprobar si los campos están completos para evitar crear tarjetas vacías
+                if (like.email1 && like.email2) {
+                    const likeElement = document.createElement('div');
+                    likeElement.classList.add('col-12', 'col-md-6', 'mb-4'); // Clases de Bootstrap para organizar los elementos
+
+                    let matchMessage = '';
+
+                    // Comprobar si es un "match" (si el usuario logueado está en email1 y en email2 de otro like)
+                    if (like.email1 === loggedInUser.email && likes.some(otherLike => otherLike.email1 === like.email2 && otherLike.email2 === loggedInUser.email)) {
+                        // Si el usuario está en email1 y también existe un "me gusta" del email2 hacia el usuario logueado
+                        matchMessage = `¡Es un match con ${like.email2}! Ambos se gustan.`;
+                    } else if (like.email2 === loggedInUser.email) {
+                        // Si solo el email2 coincide, es un "me gusta"
+                        matchMessage = `¡A ${like.email1} le gustas!`;
+                    }
+
+                    likeElement.innerHTML = `
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">${matchMessage}</h5>
+                                <p class="card-text">
+                                    ¡Estás en su lista de favoritos! Conecta con ellos y conoce más.
+                                </p>
+                                <a href="#" class="btn btn-primary">Ver perfil</a>
+                            </div>
+                        </div>
+                    `;
+                    if(matchMessage!==""){
+                        console.log(matchMessage);
+                        likesContainer.appendChild(likeElement);
+                    }
+                    
+                }
+            });
+        } else {
+            // Si no hay "me gusta" filtrados, mostrar un mensaje
+            likesContainer.innerHTML = `
+                <div class="alert alert-warning text-center" role="alert">
+                    No tienes "Me Gusta" registrados.
+                </div>
+            `;
+        }
+    } else {
+        // Si no hay "me gusta", mostrar un mensaje
+        likesContainer.innerHTML = `
+            <div class="alert alert-info text-center" role="alert">
+                No hay "Me Gusta" registrados.
+            </div>
+        `;
+    }
 }

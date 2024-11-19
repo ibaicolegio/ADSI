@@ -1,62 +1,42 @@
 [
     {
-        "idAficion": "1",
-        "nombreAficion": "caminar"
+        "email1": "ana@adsi.com",
+        "email2": "borja@adsi.com"
     },
     {
-        "idAficion": "2",
-        "nombreAficion": "ajedrez"
+        "email1": "maria@adsi.com",
+        "email2": "juan@adsi.com"
     },
     {
-        "idAficion": "3",
-        "nombreAficion": "leer"
+        "email1": "borja@adsi.com",
+        "email2": "pedro@adsi.com"
     },
     {
-        "idAficion": "4",
-        "nombreAficion": "pintar"
+        "email1": "borja@adsi.com",
+        "email2": "ana@adsi.com"
     },
     {
-        "idAficion": "5",
-        "nombreAficion": "nadar"
+        "email1": "alfonso@adsi.com",
+        "email2": "borja@adsi.com"
     },
     {
-        "idAficion": "6",
-        "nombreAficion": "fotografía"
+        "email1": "carmen@adsi.com",
+        "email2": "jose@adsi.com"
     },
     {
-        "idAficion": "7",
-        "nombreAficion": "correr"
+        "email1": "elena@adsi.com",
+        "email2": "manuel@adsi.com"
     },
     {
-        "idAficion": "8",
-        "nombreAficion": "música"
+        "email1": "marta@adsi.com",
+        "email2": "danel@adsi.com"
     },
     {
-        "idAficion": "9",
-        "nombreAficion": "ciclismo"
+        "email1": "borja@adsi.com",
+        "email2": "laura@adsi.com"
     },
     {
-        "idAficion": "10",
-        "nombreAficion": "bailar"
-    },
-    {
-        "idAficion": "11",
-        "nombreAficion": "cocinar"
-    },
-    {
-        "idAficion": "12",
-        "nombreAficion": "viajar"
-    },
-    {
-        "idAficion": "13",
-        "nombreAficion": "jardinería"
-    },
-    {
-        "idAficion": "14",
-        "nombreAficion": "escribir"
-    },
-    {
-        "idAficion": "15",
-        "nombreAficion": "videojuegos"
+        "email1": "pedro@adsi.com",
+        "email2": "sofia@adsi.com"
     }
 ]
