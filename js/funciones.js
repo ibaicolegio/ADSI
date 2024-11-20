@@ -19,38 +19,77 @@ export function cargarLikes(obtenerLikesDesdeIndexedDB) {
                     // Verificar si hay "me gusta" filtrados
                     if (filteredLikes.length > 0) {
                         // Recorrer los "me gusta" filtrados y mostrarlos en tarjetas
+                        // Inicializar los arrays para los matches y los likes
+                        const matches = [];
+                        const likes = [];
                         filteredLikes.forEach(like => {
                             // Comprobar si los campos están completos para evitar crear tarjetas vacías
                             if (like.email1 && like.email2) {
                                 const likeElement = document.createElement('div');
                                 likeElement.classList.add('col-12', 'col-md-6', 'mb-4'); // Clases de Bootstrap para organizar los elementos
-
-                                let matchMessage = '';
-
-                                // Comprobar si es un "match" (si el usuario logueado está en email1 y en email2 de otro like)
                                 if (like.email1 === loggedInUser.email && likes.some(otherLike => otherLike.email1 === like.email2 && otherLike.email2 === loggedInUser.email)) {
-                                    // Si el usuario está en email1 y también existe un "me gusta" del email2 hacia el usuario logueado
-                                    matchMessage = `¡Es un match con ${like.email2}! Ambos se gustan.`;
+                                    // Si es un "match", almacenamos ambos usuarios en el array de matches
+                                    matches.push({user1: like.email1, user2: like.email2});
                                 } else if (like.email2 === loggedInUser.email) {
-                                    // Si solo el email2 coincide, es un "me gusta"
-                                    matchMessage = `¡A ${like.email1} le gustas!`;
+                                    // Si solo hay un "me gusta", almacenamos en el array de likes
+                                    likes.push(like.email1);  // Almacenamos el email del usuario que le ha dado like
                                 }
 
-                                likeElement.innerHTML = `
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">${matchMessage}</h5>
-                                        <p class="card-text">
-                                            ¡Estás en su lista de favoritos! Conecta con ellos y conoce más.
-                                        </p>
-                                        <a href="#" class="btn btn-primary">Ver perfil</a>
-                                    </div>
-                                </div>
-                            `;
-                                if (matchMessage !== "") {
-                                    console.log(matchMessage);
-                                    likesContainer.appendChild(likeElement);
-                                }
+                            }
+                        });
+                        console.log(likes);
+                        console.log(matches);
+                        // Recorremos los matches primero
+                        matches.forEach(match => {
+                            const likeElement = document.createElement("div");
+                            likeElement.classList.add("col-12", "col-md-6", "mb-4");
+
+                            // Crear mensaje de match
+                            const matchMessage = `¡Es un match con ${match.user2}! Ambos se gustan.`;
+
+                            likeElement.innerHTML = `
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">${matchMessage}</h5>
+                <p class="card-text">
+                    ¡Estás en su lista de favoritos! Conecta con ellos y conoce más.
+                </p>
+                <a href="#" class="btn btn-primary">Ver perfil</a>
+            </div>
+        </div>
+    `;
+
+                            // Añadir el elemento al contenedor si tiene mensaje
+                            if (matchMessage !== "") {
+                                console.log(matchMessage);
+                                likesContainer.appendChild(likeElement);
+                            }
+                        });
+
+// Recorremos los likes
+                        likes.forEach(likeEmail => {
+                            const likeElement = document.createElement("div");
+                            likeElement.classList.add("col-12", "col-md-6", "mb-4");
+
+                            // Crear mensaje de "me gusta"
+                            const likeMessage = `¡A ${likeEmail} le gustas!`;
+
+                            likeElement.innerHTML = `
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">${likeMessage}</h5>
+                <p class="card-text">
+                    ¡Estás en su lista de favoritos! Conecta con ellos y conoce más.
+                </p>
+                <a href="#" class="btn btn-primary">Ver perfil</a>
+            </div>
+        </div>
+    `;
+
+                            // Añadir el elemento al contenedor si tiene mensaje
+                            if (likeMessage !== "") {
+                                console.log(likeMessage);
+                                likesContainer.appendChild(likeElement);
                             }
                         });
                     } else {
@@ -126,7 +165,7 @@ export function buscar(obtenerUsuariosDesdeIndexedDB, content, view) {
     const searchResultsContainer = document.getElementById("searchResultsContainer");
     const busquedaExtra = document.getElementById("busquedaExtra");
     const isAuthenticated = sessionStorage.getItem("userLoggedIn");
-    if(isAuthenticated){
+    if (isAuthenticated) {
         // Aficiones predefinidas
         const aficiones = [
             "Deportes",
@@ -186,7 +225,7 @@ export function buscar(obtenerUsuariosDesdeIndexedDB, content, view) {
         busquedaExtra.appendChild(aficionesContainer);
 
     }
-    
+
     // Verificar si el formulario existe
     if (searchForm) {
         // Manejar el evento de envío del formulario
@@ -264,8 +303,8 @@ export function buscar(obtenerUsuariosDesdeIndexedDB, content, view) {
                                 images.forEach(img => {
                                     img.style.filter = 'blur(5px)'; // Aplica el desenfoque de 5px
                                 });
-                            } 
-                            
+                            }
+
                             // Agregar evento a los botones "Ver perfil"
                             const viewProfileButtons = document.querySelectorAll("#viewProfileButton");
                             viewProfileButtons.forEach(button => {
@@ -275,7 +314,7 @@ export function buscar(obtenerUsuariosDesdeIndexedDB, content, view) {
 
 // Guardar el correo en sessionStorage
                                     sessionStorage.setItem("selectedUserEmail", userEmail);
-                                    
+
                                     // Verificar si el usuario está autenticado
                                     const isAuthenticated = sessionStorage.getItem("userLoggedIn");
                                     if (!isAuthenticated) {
@@ -294,21 +333,21 @@ export function buscar(obtenerUsuariosDesdeIndexedDB, content, view) {
                                                 });
                                     } else {
                                         const isAuthenticated = sessionStorage.getItem("userLoggedIn");
-                            const isSelectedUserEmail = sessionStorage.getItem("selectedUserEmail");
-                            if(isAuthenticated && isSelectedUserEmail){
-                                fetch("./views/verPerfil.html")
-                                                .then((response) => {
-                                                    if (!response.ok)
-                                                        throw new Error("Página no encontrada.");
-                                                    return response.text();
-                                                })
-                                                .then((html) => {
-                                                    content.innerHTML = html;
-                                                })
-                                                .catch((error) => {
-                                                    content.innerHTML = `<p>Error: ${error.message}</p>`;
-                                                });
-                            }
+                                        const isSelectedUserEmail = sessionStorage.getItem("selectedUserEmail");
+                                        if (isAuthenticated && isSelectedUserEmail) {
+                                            fetch("./views/verPerfil.html")
+                                                    .then((response) => {
+                                                        if (!response.ok)
+                                                            throw new Error("Página no encontrada.");
+                                                        return response.text();
+                                                    })
+                                                    .then((html) => {
+                                                        content.innerHTML = html;
+                                                    })
+                                                    .catch((error) => {
+                                                        content.innerHTML = `<p>Error: ${error.message}</p>`;
+                                                    });
+                                        }
                                         // Si está autenticado, permitir ver el perfil
                                         console.log(`Mostrar perfil de usuario: ${userEmail}`);
                                         // Aquí podrías cargar la página de detalles de perfil o hacer lo que desees
