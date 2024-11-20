@@ -1,4 +1,5 @@
 import {cargarLikes, login, buscar} from "./js/funciones.js";
+import {openIndexedDB, insertarEnIndexedDB} from "./js/bd.js";
 // Objeto para almacenar las páginas cargadas
 const cache = {};
 
