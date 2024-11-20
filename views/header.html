@@ -7,7 +7,16 @@
 
             <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
                 <li><a href="#" class="nav-link px-2 link-secondary link-body-emphasis" data-view="views/inicio.html">Inicio</a></li>
-                <li><a href="#" class="nav-link px-2 link-secondary" data-view="views/busqueda.html">Busqueda</a></li>
+                <!-- Desplegable para Búsqueda -->
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle px-2 link-secondary" id="busquedaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Búsqueda
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="busquedaDropdown">
+                        <li><a href="#" class="nav-link dropdown-item" data-view="views/busqueda.html">Búsqueda</a></li>
+                        <li><a href="#" class="nav-link dropdown-item" data-view="views/geolocalizacion.html">Geolocalización</a></li>
+                    </ul>
+                </li>
                 <li><a href="#" class="nav-link px-2 link-secondary" data-view="views/modificarPerfil.html">Modificar perfil</a></li>
                 <li><a href="#" class="nav-link px-2 link-secondary" data-view="views/aficiones.html">Aficiones</a></li>
                 <li><a href="#" class="nav-link px-2 link-secondary" data-view="views/verLikes.html">Ver likes</a></li>
