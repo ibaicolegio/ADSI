@@ -1,5 +1,5 @@
 import {cargarLikes, login, buscar} from "./js/funciones.js";
-import {openIndexedDB, insertarEnIndexedDB} from "./js/bd.js";
+import {cargarYAlmacenarDatos, obtenerUsuariosDesdeIndexedDB, obtenerLikesDesdeIndexedDB} from "./js/bd.js";
 // Objeto para almacenar las páginas cargadas
 const cache = {};
 
@@ -12,77 +12,21 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (!isAuthenticated) {
         // Mostrar el login con su propio header
         loadPaginaPrincipal();
+        buscar(obtenerUsuariosDesdeIndexedDB);
     } else {
         // Mostrar el contenido principal con el header general
         loadPaginaUsuario();
     }
 
-    await loadAndStoreData();
+    cargarYAlmacenarDatos();
 
 });
-
-async function loadAndStoreData() {
-    try {
-         // Abrir la base de datos
-        const db = await openIndexedDB();
-
-        // Cargar y almacenar usuarios
-        const usuariosResponse = await fetch('json/usuarios.json');
-        if (!usuariosResponse.ok) {
-            throw new Error(`Error al cargar usuarios.json: ${usuariosResponse.status}`);
-        }
-        const usuariosData = await usuariosResponse.json();
-        await insertarEnIndexedDB(db, 'usuarios', usuariosData);
-
-        // Cargar y almacenar meGusta
-        const meGustaResponse = await fetch('json/meGusta.json');
-        if (!meGustaResponse.ok) {
-            throw new Error(`Error al cargar meGusta.json: ${meGustaResponse.status}`);
-        }
-        const meGustaData = await meGustaResponse.json();
-        await insertarEnIndexedDB(db, 'meGusta', meGustaData);
-
-        // Cargar y almacenar aficiones
-        const aficionesResponse = await fetch('json/aficiones.json');
-        if (!aficionesResponse.ok) {
-            throw new Error(`Error al cargar aficiones.json: ${aficionesResponse.status}`);
-        }
-        const aficionesData = await aficionesResponse.json();
-        await insertarEnIndexedDB(db, 'aficiones', aficionesData);
-
-        // Cargar y almacenar usuAfi
-        const usuAfiResponse = await fetch('json/usuAfi.json');
-        if (!usuAfiResponse.ok) {
-            throw new Error(`Error al cargar usuAfi.json: ${usuAfiResponse.status}`);
-        }
-        const usuAfiData = await usuAfiResponse.json();
-        await insertarEnIndexedDB(db, 'usuAfi', usuAfiData);
-
-        console.log('Todos los datos se almacenaron en IndexedDB correctamente.');
-        
-        
-        // Opcional: Mostrar los datos en el DOM
-        const output = document.getElementById('output');
-        if (output) {
-            output.textContent = `Usuarios cargados:\n${JSON.stringify(usuariosData, null, 2)}\n\nObjetos cargados:\n${JSON.stringify(aficionesData, null, 2)}`;
-        }
-    } catch (error) {
-        console.error('Error al cargar datos:', error.message);
-
-        // Mostrar error en el DOM si existe el contenedor
-        const output = document.getElementById('output');
-        if (output) {
-            output.textContent = `Error: ${error.message}`;
-        }
-    }
-}
-
 
 // Función para cargar la página de login con su propio header
 function loadPaginaPrincipal() {
     Promise.all([
         loadHTML("views/login-header.html", "header"),
-        loadHTML("views/busqueda.html", "main"),
+        loadHTML("views/inicio.html", "main"),
         loadHTML("views/footer.html", "footer")
     ]).then(() => {
         // Este bloque solo se ejecuta después de que todo se ha cargado
@@ -106,7 +50,10 @@ function loadPaginaPrincipal() {
                 if (view) {
                     if (cache[view]) {
                         content.innerHTML = cache[view];
-                        
+                        if (view === "views/busqueda.html") {
+                            console.log(view);
+                            buscar(obtenerUsuariosDesdeIndexedDB);
+                        }
                     } else {
                         fetch(view)
                                 .then((response) => {
@@ -119,11 +66,11 @@ function loadPaginaPrincipal() {
                                     content.innerHTML = html;
                                     if (view === "views/login.html") {
                                         console.log(view);
-                                        login();
+                                        login(obtenerUsuariosDesdeIndexedDB);
                                     }
                                     if (view === "views/busqueda.html") {
                                         console.log(view);
-                                        buscar();
+                                        buscar(obtenerUsuariosDesdeIndexedDB);
                                     }
                                 })
                                 .catch((error) => {
@@ -182,8 +129,12 @@ function loadPaginaUsuario() {
                                 content.innerHTML = cache[view];
                                 if (view === "views/verLikes.html") {
                                     console.log(view);
-                                    cargarLikes();
+                                    cargarLikes(obtenerLikesDesdeIndexedDB);
                                 }
+                                if (view === "views/busqueda.html") {
+                                        console.log(view);
+                                        buscar(obtenerUsuariosDesdeIndexedDB);
+                                    }
                             } else {
                                 fetch(view)
                                         .then((response) => {
@@ -196,7 +147,11 @@ function loadPaginaUsuario() {
                                             content.innerHTML = html;
                                             if (view === "views/verLikes.html") {
                                                 console.log(view);
-                                                cargarLikes();
+                                                cargarLikes(obtenerLikesDesdeIndexedDB);
+                                            }
+                                            if (view === "views/busqueda.html") {
+                                                console.log(view);
+                                                buscar(obtenerUsuariosDesdeIndexedDB);
                                             }
                                         })
                                         .catch((error) => {

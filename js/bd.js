@@ -1,30 +1,28 @@
-/* 
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/javascript.js to edit this template
- */
-
-// prueba indexedBD
-
 // Función para abrir o crear la base de datos IndexedDB
-
-export function openIndexedDB() {
+function openIndexedDB() {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open('MiBaseDeDatos', 1);
+        const request = indexedDB.open('VitoMaite', 1);  // Abre o crea la base de datos
 
         request.onupgradeneeded = function (event) {
             const db = event.target.result;
 
+            // Crear almacenes para cada tipo de datos
             if (!db.objectStoreNames.contains('usuarios')) {
-                // Crear el almacén "usuarios" con "email" como clave primaria
                 db.createObjectStore('usuarios', { keyPath: 'email' });
-                // Crear el almacén "aficiones" con "id" como clave primaria
-                db.createObjectStore('usuarios', { keyPath: 'id' });
-                db.createObjectStore('meGusta', { keyPath: 'id'});
+            }
+            if (!db.objectStoreNames.contains('meGusta')) {
+                db.createObjectStore('meGusta', { keyPath: ['email1', 'email2'] });  // Usando 'email1' como clave primaria
+            }
+            if (!db.objectStoreNames.contains('aficiones')) {
+                db.createObjectStore('aficiones', { keyPath: 'idAficion' });
+            }
+            if (!db.objectStoreNames.contains('usuAfi')) {
+                db.createObjectStore('usuAfi', { keyPath: ['email', 'idAficion'] });
             }
         };
 
         request.onsuccess = function (event) {
-            resolve(event.target.result);
+            resolve(event.target.result);  // Resuelve la promesa con la base de datos
         };
 
         request.onerror = function (event) {
@@ -33,17 +31,15 @@ export function openIndexedDB() {
     });
 }
 
-
-
-// Función para insertar datos en un almacén
-export function insertarEnIndexedDB(db, storeName, data) {
+// Función para insertar los datos en IndexedDB
+function insertarEnIndexedDB(db, storeName, data) {
     return new Promise((resolve, reject) => {
         const transaction = db.transaction(storeName, 'readwrite');
         const objectStore = transaction.objectStore(storeName);
 
         // Insertar cada registro en el almacén
         data.forEach((item) => {
-            objectStore.put(item); // Usa put para insertar o actualizar registros
+            objectStore.put(item);  // Usamos put para insertar o actualizar registros
         });
 
         transaction.oncomplete = function () {
@@ -51,12 +47,116 @@ export function insertarEnIndexedDB(db, storeName, data) {
         };
 
         transaction.onerror = function (event) {
-            reject(`Error al insertar en ${storeName}: ${event.target.error}`);
+            reject(`Error al insertar en la base de datos ${storeName}: ${event.target.error}`);
         };
     });
 }
 
+// Función para cargar el archivo JSON
+function cargarJSONDesdeArchivo(url) {
+    return fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error al cargar el archivo JSON: ${url}`);
+            }
+            return response.json();
+        })
+        .catch(error => {
+            console.error('Error al cargar el archivo JSON:', error);
+            throw error;
+        });
+}
 
+// Función para cargar y almacenar todos los datos en IndexedDB
+export function cargarYAlmacenarDatos() {
+    // Rutas de los archivos JSON
+    const archivosJSON = {
+        usuarios: './json/usuarios.json',
+        meGusta: './json/meGusta.json',
+        aficiones: './json/aficiones.json',
+        usuAfi: './json/usuAfi.json'
+    };
 
+    // Cargar todos los archivos JSON
+    Promise.all([
+        cargarJSONDesdeArchivo(archivosJSON.usuarios),
+        cargarJSONDesdeArchivo(archivosJSON.meGusta),
+        cargarJSONDesdeArchivo(archivosJSON.aficiones),
+        cargarJSONDesdeArchivo(archivosJSON.usuAfi)
+    ])
+    .then(([usuariosData, meGustaData, aficionesData, usuAfiData]) => {
+        // Abre la base de datos y almacena los datos
+        openIndexedDB().then((db) => {
+            // Almacenar los datos en sus respectivos almacenes
+            Promise.all([
+                insertarEnIndexedDB(db, 'usuarios', usuariosData),
+                insertarEnIndexedDB(db, 'meGusta', meGustaData),
+                insertarEnIndexedDB(db, 'aficiones', aficionesData),
+                insertarEnIndexedDB(db, 'usuAfi', usuAfiData)
+            ])
+            .then(() => {
+                console.log("Todos los datos se insertaron correctamente en IndexedDB");
+            })
+            .catch((error) => {
+                console.error("Error al insertar los datos en IndexedDB:", error);
+            });
+        }).catch((error) => {
+            console.error("Error al abrir la base de datos:", error);
+        });
+    })
+    .catch(error => {
+        console.error('Error al cargar los archivos JSON:', error);
+    });
+}
 
+// Función para obtener los usuarios desde IndexedDB
+export function obtenerUsuariosDesdeIndexedDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open("VitoMaite", 1);
 
+        request.onsuccess = function(event) {
+            const db = event.target.result;
+            const transaction = db.transaction("usuarios", "readonly");
+            const objectStore = transaction.objectStore("usuarios");
+            const allUsersRequest = objectStore.getAll(); // Obtener todos los usuarios
+
+            allUsersRequest.onsuccess = function() {
+                resolve(allUsersRequest.result); // Resolver con todos los usuarios
+            };
+
+            allUsersRequest.onerror = function(event) {
+                reject("Error al obtener los usuarios: " + event.target.error);
+            };
+        };
+
+        request.onerror = function(event) {
+            reject("Error al abrir la base de datos IndexedDB: " + event.target.error);
+        };
+    });
+}
+
+// Función para obtener los "me gusta" desde IndexedDB
+export function obtenerLikesDesdeIndexedDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open("VitoMaite", 1);  // Nombre de la base de datos
+
+        request.onsuccess = function (event) {
+            const db = event.target.result;
+            const transaction = db.transaction("meGusta", "readonly"); // Accede al almacén "meGusta"
+            const objectStore = transaction.objectStore("meGusta");
+            const allLikesRequest = objectStore.getAll(); // Recupera todos los "me gusta"
+
+            allLikesRequest.onsuccess = function () {
+                resolve(allLikesRequest.result); // Resolución con los "me gusta" encontrados
+            };
+
+            allLikesRequest.onerror = function (event) {
+                reject("Error al obtener los 'me gusta': " + event.target.error); // Rechaza si ocurre un error
+            };
+        };
+
+        request.onerror = function (event) {
+            reject("Error al abrir la base de datos IndexedDB: " + event.target.error); // Rechaza si hay un error al abrir la base de datos
+        };
+    });
+}
