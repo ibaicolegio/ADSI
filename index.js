@@ -52,7 +52,7 @@ function loadPaginaPrincipal() {
                         content.innerHTML = cache[view];
                         if (view === "views/busqueda.html") {
                             console.log(view);
-                            buscar(obtenerUsuariosDesdeIndexedDB);
+                            buscar(obtenerUsuariosDesdeIndexedDB, content);
                         }
                     } else {
                         fetch(view)
@@ -70,7 +70,7 @@ function loadPaginaPrincipal() {
                                     }
                                     if (view === "views/busqueda.html") {
                                         console.log(view);
-                                        buscar(obtenerUsuariosDesdeIndexedDB);
+                                        buscar(obtenerUsuariosDesdeIndexedDB, content);
                                     }
                                 })
                                 .catch((error) => {
@@ -134,7 +134,7 @@ function loadPaginaUsuario() {
                                 }
                                 if (view === "views/busqueda.html") {
                                         console.log(view);
-                                        buscar(obtenerUsuariosDesdeIndexedDB);
+                                        buscar(obtenerUsuariosDesdeIndexedDB, content);
                                     }
                             } else {
                                 fetch(view)
@@ -152,7 +152,7 @@ function loadPaginaUsuario() {
                                             }
                                             if (view === "views/busqueda.html") {
                                                 console.log(view);
-                                                buscar(obtenerUsuariosDesdeIndexedDB);
+                                                buscar(obtenerUsuariosDesdeIndexedDB, content);
                                             }
                                         })
                                         .catch((error) => {

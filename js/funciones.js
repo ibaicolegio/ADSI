@@ -120,7 +120,7 @@ export function login(obtenerUsuariosDesdeIndexedDB) {
 
 
 
-export function buscar(obtenerUsuariosDesdeIndexedDB) {
+export function buscar(obtenerUsuariosDesdeIndexedDB, content, view) {
     // Obtener el formulario de búsqueda y el contenedor de resultados
     const searchForm = document.getElementById("searchForm");
     const searchResultsContainer = document.getElementById("searchResultsContainer");
@@ -195,13 +195,26 @@ export function buscar(obtenerUsuariosDesdeIndexedDB) {
                                 button.addEventListener("click", function (event) {
                                     event.preventDefault();
                                     const userEmail = button.getAttribute("data-email");
-                                 
+
+// Guardar el correo en sessionStorage
+                                    sessionStorage.setItem("selectedUserEmail", userEmail);
 
                                     // Verificar si el usuario está autenticado
                                     const isAuthenticated = sessionStorage.getItem("userLoggedIn");
                                     if (!isAuthenticated) {
-                                        // Si no está autenticado, redirigir al login
-                                        window.location.href = "login.html"; // Cargar la página de login
+                                        fetch("./views/login.html")
+                                                .then((response) => {
+                                                    if (!response.ok)
+                                                        throw new Error("Página no encontrada.");
+                                                    return response.text();
+                                                })
+                                                .then((html) => {
+                                                    content.innerHTML = html;
+                                                    login(obtenerUsuariosDesdeIndexedDB);
+                                                })
+                                                .catch((error) => {
+                                                    content.innerHTML = `<p>Error: ${error.message}</p>`;
+                                                });
                                     } else {
                                         // Si está autenticado, permitir ver el perfil
                                         console.log(`Mostrar perfil de usuario: ${userEmail}`);
