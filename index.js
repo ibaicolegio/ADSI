@@ -22,50 +22,44 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 async function loadAndStoreData() {
     try {
-        // Cargar el archivo usuarios.json
+         // Abrir la base de datos
+        const db = await openIndexedDB();
+
+        // Cargar y almacenar usuarios
         const usuariosResponse = await fetch('json/usuarios.json');
         if (!usuariosResponse.ok) {
-            throw new Error(`Error al cargar el archivo usuarios.json: ${usuariosResponse.status}`);
+            throw new Error(`Error al cargar usuarios.json: ${usuariosResponse.status}`);
         }
         const usuariosData = await usuariosResponse.json();
+        await insertarEnIndexedDB(db, 'usuarios', usuariosData);
 
-        // Almacenar usuarios en sessionStorage
-        sessionStorage.setItem('usuarios', JSON.stringify(usuariosData));
-
-        // Cargar el archivo meGusta.json
+        // Cargar y almacenar meGusta
         const meGustaResponse = await fetch('json/meGusta.json');
         if (!meGustaResponse.ok) {
-            throw new Error(`Error al cargar el archivo usuarios.json: ${meGustaResponse.status}`);
+            throw new Error(`Error al cargar meGusta.json: ${meGustaResponse.status}`);
         }
         const meGustaData = await meGustaResponse.json();
+        await insertarEnIndexedDB(db, 'meGusta', meGustaData);
 
-        // Almacenar meGusta en sessionStorage
-        sessionStorage.setItem('meGusta', JSON.stringify(meGustaData));
-
-        // Cargar el archivo aficiones.json
+        // Cargar y almacenar aficiones
         const aficionesResponse = await fetch('json/aficiones.json');
         if (!aficionesResponse.ok) {
-            throw new Error(`Error al cargar el archivo objetos.json: ${aficionesResponse.status}`);
+            throw new Error(`Error al cargar aficiones.json: ${aficionesResponse.status}`);
         }
         const aficionesData = await aficionesResponse.json();
+        await insertarEnIndexedDB(db, 'aficiones', aficionesData);
 
-        // Almacenar objetos en sessionStorage
-        sessionStorage.setItem('aficiones', JSON.stringify(aficionesData));
-        
-        // Cargar el archivo usuAfi.json
+        // Cargar y almacenar usuAfi
         const usuAfiResponse = await fetch('json/usuAfi.json');
         if (!usuAfiResponse.ok) {
-            throw new Error(`Error al cargar el archivo usuarios.json: ${usuAfiResponse.status}`);
+            throw new Error(`Error al cargar usuAfi.json: ${usuAfiResponse.status}`);
         }
         const usuAfiData = await usuAfiResponse.json();
+        await insertarEnIndexedDB(db, 'usuAfi', usuAfiData);
 
-        // Almacenar usuAfi en sessionStorage
-        sessionStorage.setItem('usuAfi', JSON.stringify(usuAfiData));
-
-        // Mostrar en consola los datos cargados para verificar
-        console.log('Usuarios cargados:', usuariosData);
-        console.log('aficiones cargados:', aficionesData);
-
+        console.log('Todos los datos se almacenaron en IndexedDB correctamente.');
+        
+        
         // Opcional: Mostrar los datos en el DOM
         const output = document.getElementById('output');
         if (output) {
@@ -81,6 +75,7 @@ async function loadAndStoreData() {
         }
     }
 }
+
 
 // Función para cargar la página de login con su propio header
 function loadPaginaPrincipal() {
