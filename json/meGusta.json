@@ -4,16 +4,16 @@
         "email2": "borja@adsi.com"
     },
     {
-        "email1": "maria@adsi.com",
-        "email2": "juan@adsi.com"
-    },
-    {
-        "email1": "borja@adsi.com",
-        "email2": "pedro@adsi.com"
-    },
-    {
         "email1": "borja@adsi.com",
         "email2": "ana@adsi.com"
+    },
+    {
+        "email1": "juan@adsi.com",
+        "email2": "maria@adsi.com"
+    },
+    {
+        "email1": "maria@adsi.com",
+        "email2": "juan@adsi.com"
     },
     {
         "email1": "alfonso@adsi.com",
@@ -21,11 +21,11 @@
     },
     {
         "email1": "carmen@adsi.com",
-        "email2": "jose@adsi.com"
+        "email2": "elena@adsi.com"
     },
     {
         "email1": "elena@adsi.com",
-        "email2": "manuel@adsi.com"
+        "email2": "carmen@adsi.com"
     },
     {
         "email1": "marta@adsi.com",
@@ -38,5 +38,13 @@
     {
         "email1": "pedro@adsi.com",
         "email2": "sofia@adsi.com"
+    },
+    {
+        "email1": "luis@adsi.com",
+        "email2": "alfonsoura@adsi.com"
+    },
+    {
+        "email1": "manuel@adsi.com",
+        "email2": "laura@adsi.com"
     }
 ]
