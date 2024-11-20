@@ -1,4 +1,4 @@
-import {cargarLikes, login, buscar} from "./js/funciones.js";
+import {cargarLikes, login, buscar, cargarFotoYMensajeBienvenida} from "./js/funciones.js";
 import {cargarYAlmacenarDatos, obtenerUsuariosDesdeIndexedDB, obtenerLikesDesdeIndexedDB} from "./js/bd.js";
 // Objeto para almacenar las páginas cargadas
 const cache = {};
@@ -94,11 +94,12 @@ function loadPaginaUsuario() {
                 const content = document.getElementById("main");
 
                 // Mostrar saludo con el nombre del usuario
-                const welcomeMessage = document.getElementById("welcomeMessage");
+                /*const welcomeMessage = document.getElementById("welcomeMessage");
                 const loggedInUser = JSON.parse(sessionStorage.getItem("userLoggedIn"));
                 if (loggedInUser) {
                     welcomeMessage.textContent = `Hola, ${loggedInUser.nombre}`;
-                }
+                }*/
+                cargarFotoYMensajeBienvenida(obtenerUsuariosDesdeIndexedDB);
 
                 // Agregar funcionalidad al botón de logout
                 const logoutButton = document.getElementById("logoutButton");

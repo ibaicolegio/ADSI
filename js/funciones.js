@@ -7,36 +7,36 @@ export function cargarLikes(obtenerLikesDesdeIndexedDB) {
 
     // Obtener los "me gusta" desde IndexedDB
     obtenerLikesDesdeIndexedDB()
-        .then(likes => {
-            // Verificar si existen "me gusta"
-            if (likes.length > 0) {
-                // Limpiar el contenedor en caso de que haya contenido previo
-                likesContainer.innerHTML = '';
+            .then(likes => {
+                // Verificar si existen "me gusta"
+                if (likes.length > 0) {
+                    // Limpiar el contenedor en caso de que haya contenido previo
+                    likesContainer.innerHTML = '';
 
-                // Filtrar los "me gusta" donde el email2 coincida con el usuario logueado o donde el usuario esté en email1
-                const filteredLikes = likes.filter(like => like.email2 === loggedInUser.email || like.email1 === loggedInUser.email);
+                    // Filtrar los "me gusta" donde el email2 coincida con el usuario logueado o donde el usuario esté en email1
+                    const filteredLikes = likes.filter(like => like.email2 === loggedInUser.email || like.email1 === loggedInUser.email);
 
-                // Verificar si hay "me gusta" filtrados
-                if (filteredLikes.length > 0) {
-                    // Recorrer los "me gusta" filtrados y mostrarlos en tarjetas
-                    filteredLikes.forEach(like => {
-                        // Comprobar si los campos están completos para evitar crear tarjetas vacías
-                        if (like.email1 && like.email2) {
-                            const likeElement = document.createElement('div');
-                            likeElement.classList.add('col-12', 'col-md-6', 'mb-4'); // Clases de Bootstrap para organizar los elementos
+                    // Verificar si hay "me gusta" filtrados
+                    if (filteredLikes.length > 0) {
+                        // Recorrer los "me gusta" filtrados y mostrarlos en tarjetas
+                        filteredLikes.forEach(like => {
+                            // Comprobar si los campos están completos para evitar crear tarjetas vacías
+                            if (like.email1 && like.email2) {
+                                const likeElement = document.createElement('div');
+                                likeElement.classList.add('col-12', 'col-md-6', 'mb-4'); // Clases de Bootstrap para organizar los elementos
 
-                            let matchMessage = '';
+                                let matchMessage = '';
 
-                            // Comprobar si es un "match" (si el usuario logueado está en email1 y en email2 de otro like)
-                            if (like.email1 === loggedInUser.email && likes.some(otherLike => otherLike.email1 === like.email2 && otherLike.email2 === loggedInUser.email)) {
-                                // Si el usuario está en email1 y también existe un "me gusta" del email2 hacia el usuario logueado
-                                matchMessage = `¡Es un match con ${like.email2}! Ambos se gustan.`;
-                            } else if (like.email2 === loggedInUser.email) {
-                                // Si solo el email2 coincide, es un "me gusta"
-                                matchMessage = `¡A ${like.email1} le gustas!`;
-                            }
+                                // Comprobar si es un "match" (si el usuario logueado está en email1 y en email2 de otro like)
+                                if (like.email1 === loggedInUser.email && likes.some(otherLike => otherLike.email1 === like.email2 && otherLike.email2 === loggedInUser.email)) {
+                                    // Si el usuario está en email1 y también existe un "me gusta" del email2 hacia el usuario logueado
+                                    matchMessage = `¡Es un match con ${like.email2}! Ambos se gustan.`;
+                                } else if (like.email2 === loggedInUser.email) {
+                                    // Si solo el email2 coincide, es un "me gusta"
+                                    matchMessage = `¡A ${like.email1} le gustas!`;
+                                }
 
-                            likeElement.innerHTML = `
+                                likeElement.innerHTML = `
                                 <div class="card">
                                     <div class="card-body">
                                         <h5 class="card-title">${matchMessage}</h5>
@@ -47,37 +47,37 @@ export function cargarLikes(obtenerLikesDesdeIndexedDB) {
                                     </div>
                                 </div>
                             `;
-                            if (matchMessage !== "") {
-                                console.log(matchMessage);
-                                likesContainer.appendChild(likeElement);
+                                if (matchMessage !== "") {
+                                    console.log(matchMessage);
+                                    likesContainer.appendChild(likeElement);
+                                }
                             }
-                        }
-                    });
-                } else {
-                    // Si no hay "me gusta" filtrados, mostrar un mensaje
-                    likesContainer.innerHTML = `
+                        });
+                    } else {
+                        // Si no hay "me gusta" filtrados, mostrar un mensaje
+                        likesContainer.innerHTML = `
                         <div class="alert alert-warning text-center" role="alert">
                             No tienes "Me Gusta" registrados.
                         </div>
                     `;
-                }
-            } else {
-                // Si no hay "me gusta", mostrar un mensaje
-                likesContainer.innerHTML = `
+                    }
+                } else {
+                    // Si no hay "me gusta", mostrar un mensaje
+                    likesContainer.innerHTML = `
                     <div class="alert alert-info text-center" role="alert">
                         No hay "Me Gusta" registrados.
                     </div>
                 `;
-            }
-        })
-        .catch(error => {
-            console.error("Error al obtener los 'me gusta' desde IndexedDB:", error);
-            likesContainer.innerHTML = `
+                }
+            })
+            .catch(error => {
+                console.error("Error al obtener los 'me gusta' desde IndexedDB:", error);
+                likesContainer.innerHTML = `
                 <div class="alert alert-danger text-center" role="alert">
                     Hubo un problema al acceder a la base de datos.
                 </div>
             `;
-        });
+            });
 }
 
 // Configurar el formulario de inicio de sesión
@@ -94,23 +94,23 @@ export function login(obtenerUsuariosDesdeIndexedDB) {
 
             // Obtener los usuarios de IndexedDB
             obtenerUsuariosDesdeIndexedDB()
-                .then(users => {
-                    // Comprobar si existe un usuario con el correo y la contraseña
-                    const user = users.find(u => u.email === username && u.password === password);
+                    .then(users => {
+                        // Comprobar si existe un usuario con el correo y la contraseña
+                        const user = users.find(u => u.email === username && u.password === password);
 
-                    if (user) {
-                        sessionStorage.setItem("userLoggedIn", JSON.stringify(user));
-                        alert("Login exitoso");
-                        // Recargar la página
-                        location.reload();
-                    } else {
-                        alert("Usuario o contraseña incorrectos.");
-                    }
-                })
-                .catch(error => {
-                    console.error("Error al recuperar los usuarios desde IndexedDB:", error);
-                    alert("Hubo un problema al acceder a la base de datos.");
-                });
+                        if (user) {
+                            sessionStorage.setItem("userLoggedIn", JSON.stringify(user));
+                            alert("Login exitoso");
+                            // Recargar la página
+                            location.reload();
+                        } else {
+                            alert("Usuario o contraseña incorrectos.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error al recuperar los usuarios desde IndexedDB:", error);
+                        alert("Hubo un problema al acceder a la base de datos.");
+                    });
         });
     } else {
         console.error("Formulario de login no encontrado. Verifica el archivo login.html");
@@ -139,44 +139,44 @@ export function buscar(obtenerUsuariosDesdeIndexedDB) {
 
             // Obtener la lista de usuarios desde IndexedDB
             obtenerUsuariosDesdeIndexedDB()
-                .then(users => {
-                    let generoValue = ""; // Convertir las opciones del formulario a "M" o "H"
-                    switch (genero) {
-                        case "mujerHombre":
-                        case "hombreHombre":
-                            generoValue = "H";
-                            break;
-                        case "hombreMujer":
-                        case "mujerMujer":
-                            generoValue = "M";
-                            break;
-                        case "mujerAmbos":
-                        case "hombreAmbos":
-                            generoValue = ["H", "M"];
-                            break;
-                    }
+                    .then(users => {
+                        let generoValue = ""; // Convertir las opciones del formulario a "M" o "H"
+                        switch (genero) {
+                            case "mujerHombre":
+                            case "hombreHombre":
+                                generoValue = "H";
+                                break;
+                            case "hombreMujer":
+                            case "mujerMujer":
+                                generoValue = "M";
+                                break;
+                            case "mujerAmbos":
+                            case "hombreAmbos":
+                                generoValue = ["H", "M"];
+                                break;
+                        }
 
-                    // Filtrar los usuarios según los criterios
-                    const filteredUsers = users.filter(user => {
-                        const userCiudad = user.ciudad ? user.ciudad.toLowerCase() : "";
-                        return (
-                            (!genero || generoValue.includes(user.genero)) &&
-                            (!isNaN(minAge) && user.edad >= minAge) &&
-                            (!isNaN(maxAge) && user.edad <= maxAge) &&
-                            (!ciudad || userCiudad === ciudad)
-                        );
-                    });
+                        // Filtrar los usuarios según los criterios
+                        const filteredUsers = users.filter(user => {
+                            const userCiudad = user.ciudad ? user.ciudad.toLowerCase() : "";
+                            return (
+                                    (!genero || generoValue.includes(user.genero)) &&
+                                    (!isNaN(minAge) && user.edad >= minAge) &&
+                                    (!isNaN(maxAge) && user.edad <= maxAge) &&
+                                    (!ciudad || userCiudad === ciudad)
+                                    );
+                        });
 
-                    // Limpiar resultados previos
-                    searchResultsContainer.innerHTML = "";
+                        // Limpiar resultados previos
+                        searchResultsContainer.innerHTML = "";
 
-                    // Mostrar los resultados o un mensaje si no hay coincidencias
-                    if (filteredUsers.length > 0) {
-                        filteredUsers.forEach(user => {
-                            const userCard = document.createElement("div");
-                            userCard.classList.add("col-12", "col-md-6", "mb-4");
+                        // Mostrar los resultados o un mensaje si no hay coincidencias
+                        if (filteredUsers.length > 0) {
+                            filteredUsers.forEach(user => {
+                                const userCard = document.createElement("div");
+                                userCard.classList.add("col-12", "col-md-6", "mb-4");
 
-                            userCard.innerHTML = `
+                                userCard.innerHTML = `
                                 <div class="card">
                                     <div class="card-body">
                                         <h5 class="card-title">${user.nombre}</h5>
@@ -186,27 +186,61 @@ export function buscar(obtenerUsuariosDesdeIndexedDB) {
                                     </div>
                                 </div>
                             `;
-                            searchResultsContainer.appendChild(userCard);
-                        });
-                    } else {
-                        searchResultsContainer.innerHTML = `
+                                searchResultsContainer.appendChild(userCard);
+                            });
+                        } else {
+                            searchResultsContainer.innerHTML = `
                             <div class="alert alert-warning text-center" role="alert">
                                 No se encontraron resultados que coincidan con los criterios de búsqueda.
                             </div>
                         `;
-                    }
-                })
-                .catch(error => {
-                    console.error("Error al obtener los usuarios desde IndexedDB:", error);
-                    searchResultsContainer.innerHTML = `
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error al obtener los usuarios desde IndexedDB:", error);
+                        searchResultsContainer.innerHTML = `
                         <div class="alert alert-danger text-center" role="alert">
                             Hubo un problema al acceder a la base de datos.
                         </div>
                     `;
-                });
+                    });
         });
     } else {
         console.error("Formulario de búsqueda no encontrado.");
+    }
+}
+
+export function cargarFotoYMensajeBienvenida(obtenerUsuariosDesdeIndexedDB) {
+    // Obtener el email del usuario actualmente logueado desde sessionStorage
+    const loggedInUser = JSON.parse(sessionStorage.getItem('userLoggedIn')) || {};
+
+    // Verificar si el usuario está logueado
+    if (loggedInUser.email) {
+        // Obtener los usuarios desde IndexedDB
+        obtenerUsuariosDesdeIndexedDB().then(users => {
+            // Buscar el usuario logueado
+            const user = users.find(u => u.email === loggedInUser.email);
+
+            if (user) {
+                // Mostrar mensaje de bienvenida
+                const welcomeMessage = document.getElementById('welcomeMessage');
+                if (loggedInUser) {
+                    welcomeMessage.textContent = `Bienvenido, ${user.nombre || "Usuario"} `;
+                }
+                // Si el usuario tiene una foto en base64, mostrarla
+                const userPhoto = document.getElementById('userPhoto');
+                if (user.foto) {
+                    userPhoto.src = `data:image/jpeg;base64,${user.foto}`; // Asumiendo que la foto está en Base64 en "fotoBase64"
+                } else {
+                    console.log("no hay foto");
+                    userPhoto.src = ''; // Si no tiene foto, dejar el espacio vacío o asignar una imagen por defecto
+                }
+            }
+        }).catch(error => {
+            console.error('Error al cargar los datos del usuario desde IndexedDB:', error);
+        });
+    } else {
+        console.log('Usuario no logueado');
     }
 }
 
