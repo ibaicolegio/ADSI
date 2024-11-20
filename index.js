@@ -32,7 +32,7 @@ function loadPaginaPrincipal() {
         // Este bloque solo se ejecuta después de que todo se ha cargado
         const loginLinks = document.querySelectorAll("header .nav-link");
         const content = document.getElementById("main");
-        
+
         // Manejar navegación en el header de login
         loginLinks.forEach((link) => {
             link.addEventListener("click", function (event) {
@@ -70,7 +70,7 @@ function loadPaginaPrincipal() {
                                     }
                                     if (view === "views/busqueda.html") {
                                         console.log(view);
-                                        buscar(obtenerUsuariosDesdeIndexedDB, content);
+                                        buscar(obtenerUsuariosDesdeIndexedDB, content, view);
                                     }
                                 })
                                 .catch((error) => {
@@ -90,15 +90,32 @@ function loadPaginaUsuario() {
         loadHTML("views/footer.html", "footer")
     ])
             .then(() => {
+
+                const isAuthenticated = sessionStorage.getItem("userLoggedIn");
+                const isSelectedUserEmail = sessionStorage.getItem("selectedUserEmail");
+                if (isAuthenticated && isSelectedUserEmail) {
+                    fetch("./views/verPerfil.html")
+                            .then((response) => {
+                                if (!response.ok)
+                                    throw new Error("Página no encontrada.");
+                                return response.text();
+                            })
+                            .then((html) => {
+                                content.innerHTML = html;
+                            })
+                            .catch((error) => {
+                                content.innerHTML = `<p>Error: ${error.message}</p>`;
+                            });
+                }
                 const links = document.querySelectorAll("header .nav-link");
                 const content = document.getElementById("main");
 
                 // Mostrar saludo con el nombre del usuario
                 /*const welcomeMessage = document.getElementById("welcomeMessage");
-                const loggedInUser = JSON.parse(sessionStorage.getItem("userLoggedIn"));
-                if (loggedInUser) {
-                    welcomeMessage.textContent = `Hola, ${loggedInUser.nombre}`;
-                }*/
+                 const loggedInUser = JSON.parse(sessionStorage.getItem("userLoggedIn"));
+                 if (loggedInUser) {
+                 welcomeMessage.textContent = `Hola, ${loggedInUser.nombre}`;
+                 }*/
                 cargarFotoYMensajeBienvenida(obtenerUsuariosDesdeIndexedDB);
 
                 // Agregar funcionalidad al botón de logout
@@ -133,9 +150,9 @@ function loadPaginaUsuario() {
                                     cargarLikes(obtenerLikesDesdeIndexedDB);
                                 }
                                 if (view === "views/busqueda.html") {
-                                        console.log(view);
-                                        buscar(obtenerUsuariosDesdeIndexedDB, content);
-                                    }
+                                    console.log(view);
+                                    buscar(obtenerUsuariosDesdeIndexedDB, content);
+                                }
                             } else {
                                 fetch(view)
                                         .then((response) => {

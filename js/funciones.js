@@ -124,7 +124,69 @@ export function buscar(obtenerUsuariosDesdeIndexedDB, content, view) {
     // Obtener el formulario de búsqueda y el contenedor de resultados
     const searchForm = document.getElementById("searchForm");
     const searchResultsContainer = document.getElementById("searchResultsContainer");
+    const busquedaExtra = document.getElementById("busquedaExtra");
+    const isAuthenticated = sessionStorage.getItem("userLoggedIn");
+    if(isAuthenticated){
+        // Aficiones predefinidas
+        const aficiones = [
+            "Deportes",
+            "Lectura",
+            "Cine",
+            "Viajar",
+            "Música",
+            "Cocina",
+            "Arte",
+            "Tecnología",
+            "Jardinería",
+            "Fotografía"
+        ];
 
+        // Obtener el contenedor de aficiones
+        const busquedaExtra = document.getElementById("busquedaExtra");
+
+        // Añadir el label principal
+        const labelPrincipal = document.createElement("label");
+        labelPrincipal.htmlFor = "busquedaExtra";
+        labelPrincipal.textContent = "Selecciona tus aficiones:";
+        labelPrincipal.classList.add("form-label", "mb-3", "d-block");
+        busquedaExtra.appendChild(labelPrincipal);
+
+        // Crear la lista de aficiones dinámicamente
+        const aficionesContainer = document.createElement("div");
+        aficionesContainer.classList.add("row", "g-3");
+
+        aficiones.forEach(aficion => {
+            // Crear un contenedor para cada afición (con tarjeta)
+            const aficionContainer = document.createElement("div");
+            aficionContainer.classList.add("aficion-item", "col-md-3");  // Cuatro ítems por fila en pantallas medianas
+
+            // Crear el input (checkbox)
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.name = "aficiones";
+            checkbox.value = aficion;
+            checkbox.id = `aficion-${aficion.toLowerCase()}`;
+            checkbox.classList.add("form-check-input", "me-2");
+
+            // Crear la etiqueta para el checkbox
+            const label = document.createElement("label");
+            label.htmlFor = checkbox.id;
+            label.textContent = aficion;
+            label.classList.add("form-check-label");
+
+            // Añadir el checkbox y la etiqueta al contenedor de la afición
+            aficionContainer.appendChild(checkbox);
+            aficionContainer.appendChild(label);
+
+            // Añadir el contenedor al contenedor principal de aficiones
+            aficionesContainer.appendChild(aficionContainer);
+        });
+
+        // Añadir el contenedor de aficiones al div principal
+        busquedaExtra.appendChild(aficionesContainer);
+
+    }
+    
     // Verificar si el formulario existe
     if (searchForm) {
         // Manejar el evento de envío del formulario
@@ -178,17 +240,32 @@ export function buscar(obtenerUsuariosDesdeIndexedDB, content, view) {
 
                                 userCard.innerHTML = `
                                 <div class="card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">${user.nombre}</h5>
-                                        <p class="card-text">Edad: ${user.edad}</p>
-                                        <p class="card-text">Ciudad: ${user.ciudad}</p>
-                                        <a href="#" class="btn btn-primary" id="viewProfileButton" data-email="${user.email}">Ver perfil</a>
+                                    <div class="card-body d-flex align-items-center">
+                                        <!-- Imagen del usuario a la derecha -->
+                                        <div class="flex-grow-1">
+                                            <h5 class="card-title">${user.nombre}</h5>
+                                            <p class="card-text">Edad: ${user.edad}</p>
+                                            <p class="card-text">Ciudad: ${user.ciudad}</p>
+                                            <a href="#" id="viewProfileButton" class="btn btn-primary view-profile-button" data-email="${user.email}">Ver perfil</a>
+                                        </div>
+                                        <!-- Imagen en formato base64 -->
+                                        <img 
+                                            src="data:image/jpeg;base64,${user.foto}"
+                                            class="rounded-circle ms-3" 
+                                            style="width: 100px; height: 100px; object-fit: cover;">
                                     </div>
                                 </div>
                             `;
                                 searchResultsContainer.appendChild(userCard);
                             });
-
+                            const isAuthenticated = sessionStorage.getItem("userLoggedIn");
+                            if (!isAuthenticated) {
+                                const images = document.querySelectorAll('img');
+                                images.forEach(img => {
+                                    img.style.filter = 'blur(5px)'; // Aplica el desenfoque de 5px
+                                });
+                            } 
+                            
                             // Agregar evento a los botones "Ver perfil"
                             const viewProfileButtons = document.querySelectorAll("#viewProfileButton");
                             viewProfileButtons.forEach(button => {
@@ -198,7 +275,7 @@ export function buscar(obtenerUsuariosDesdeIndexedDB, content, view) {
 
 // Guardar el correo en sessionStorage
                                     sessionStorage.setItem("selectedUserEmail", userEmail);
-
+                                    
                                     // Verificar si el usuario está autenticado
                                     const isAuthenticated = sessionStorage.getItem("userLoggedIn");
                                     if (!isAuthenticated) {
@@ -216,6 +293,22 @@ export function buscar(obtenerUsuariosDesdeIndexedDB, content, view) {
                                                     content.innerHTML = `<p>Error: ${error.message}</p>`;
                                                 });
                                     } else {
+                                        const isAuthenticated = sessionStorage.getItem("userLoggedIn");
+                            const isSelectedUserEmail = sessionStorage.getItem("selectedUserEmail");
+                            if(isAuthenticated && isSelectedUserEmail){
+                                fetch("./views/verPerfil.html")
+                                                .then((response) => {
+                                                    if (!response.ok)
+                                                        throw new Error("Página no encontrada.");
+                                                    return response.text();
+                                                })
+                                                .then((html) => {
+                                                    content.innerHTML = html;
+                                                })
+                                                .catch((error) => {
+                                                    content.innerHTML = `<p>Error: ${error.message}</p>`;
+                                                });
+                            }
                                         // Si está autenticado, permitir ver el perfil
                                         console.log(`Mostrar perfil de usuario: ${userEmail}`);
                                         // Aquí podrías cargar la página de detalles de perfil o hacer lo que desees
