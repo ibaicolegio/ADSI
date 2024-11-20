@@ -1,7 +1,7 @@
 // Función para abrir o crear la base de datos IndexedDB
 function openIndexedDB() {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open('VitoMaite', 1);  // Abre o crea la base de datos
+        const request = indexedDB.open('VitoMaite09', 1);  // Abre o crea la base de datos
 
         request.onupgradeneeded = function (event) {
             const db = event.target.result;
@@ -16,8 +16,8 @@ function openIndexedDB() {
             if (!db.objectStoreNames.contains('aficiones')) {
                 db.createObjectStore('aficiones', { keyPath: 'idAficion' });
             }
-            if (!db.objectStoreNames.contains('usuAfi')) {
-                db.createObjectStore('usuAfi', { keyPath: ['email', 'idAficion'] });
+            if (!db.objectStoreNames.contains('usuario_aficion')) {
+                db.createObjectStore('usuario_aficion', { keyPath: ['email', 'idAficion'] });
             }
         };
 
@@ -74,7 +74,7 @@ export function cargarYAlmacenarDatos() {
         usuarios: './json/usuarios.json',
         meGusta: './json/meGusta.json',
         aficiones: './json/aficiones.json',
-        usuAfi: './json/usuAfi.json'
+        usuario_aficion: './json/usuario_aficion.json'
     };
 
     // Cargar todos los archivos JSON
@@ -82,9 +82,9 @@ export function cargarYAlmacenarDatos() {
         cargarJSONDesdeArchivo(archivosJSON.usuarios),
         cargarJSONDesdeArchivo(archivosJSON.meGusta),
         cargarJSONDesdeArchivo(archivosJSON.aficiones),
-        cargarJSONDesdeArchivo(archivosJSON.usuAfi)
+        cargarJSONDesdeArchivo(archivosJSON.usuario_aficion)
     ])
-    .then(([usuariosData, meGustaData, aficionesData, usuAfiData]) => {
+    .then(([usuariosData, meGustaData, aficionesData, usuario_aficionData]) => {
         // Abre la base de datos y almacena los datos
         openIndexedDB().then((db) => {
             // Almacenar los datos en sus respectivos almacenes
@@ -92,7 +92,7 @@ export function cargarYAlmacenarDatos() {
                 insertarEnIndexedDB(db, 'usuarios', usuariosData),
                 insertarEnIndexedDB(db, 'meGusta', meGustaData),
                 insertarEnIndexedDB(db, 'aficiones', aficionesData),
-                insertarEnIndexedDB(db, 'usuAfi', usuAfiData)
+                insertarEnIndexedDB(db, 'usuario_aficion', usuario_aficionData)
             ])
             .then(() => {
                 console.log("Todos los datos se insertaron correctamente en IndexedDB");
@@ -112,7 +112,7 @@ export function cargarYAlmacenarDatos() {
 // Función para obtener los usuarios desde IndexedDB
 export function obtenerUsuariosDesdeIndexedDB() {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open("VitoMaite", 1);
+        const request = indexedDB.open("VitoMaite09", 1);
 
         request.onsuccess = function(event) {
             const db = event.target.result;
@@ -138,7 +138,7 @@ export function obtenerUsuariosDesdeIndexedDB() {
 // Función para obtener los "me gusta" desde IndexedDB
 export function obtenerLikesDesdeIndexedDB() {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open("VitoMaite", 1);  // Nombre de la base de datos
+        const request = indexedDB.open("VitoMaite09", 1);  // Nombre de la base de datos
 
         request.onsuccess = function (event) {
             const db = event.target.result;
