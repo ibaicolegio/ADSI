@@ -182,12 +182,34 @@ export function buscar(obtenerUsuariosDesdeIndexedDB) {
                                         <h5 class="card-title">${user.nombre}</h5>
                                         <p class="card-text">Edad: ${user.edad}</p>
                                         <p class="card-text">Ciudad: ${user.ciudad}</p>
-                                        <a href="#" class="btn btn-primary">Ver perfil</a>
+                                        <a href="#" class="btn btn-primary" id="viewProfileButton" data-email="${user.email}">Ver perfil</a>
                                     </div>
                                 </div>
                             `;
                                 searchResultsContainer.appendChild(userCard);
                             });
+
+                            // Agregar evento a los botones "Ver perfil"
+                            const viewProfileButtons = document.querySelectorAll("#viewProfileButton");
+                            viewProfileButtons.forEach(button => {
+                                button.addEventListener("click", function (event) {
+                                    event.preventDefault();
+                                    const userEmail = button.getAttribute("data-email");
+                                 
+
+                                    // Verificar si el usuario está autenticado
+                                    const isAuthenticated = sessionStorage.getItem("userLoggedIn");
+                                    if (!isAuthenticated) {
+                                        // Si no está autenticado, redirigir al login
+                                        window.location.href = "login.html"; // Cargar la página de login
+                                    } else {
+                                        // Si está autenticado, permitir ver el perfil
+                                        console.log(`Mostrar perfil de usuario: ${userEmail}`);
+                                        // Aquí podrías cargar la página de detalles de perfil o hacer lo que desees
+                                    }
+                                });
+                            });
+
                         } else {
                             searchResultsContainer.innerHTML = `
                             <div class="alert alert-warning text-center" role="alert">
