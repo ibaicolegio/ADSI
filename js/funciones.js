@@ -22,21 +22,24 @@ export function cargarLikes(obtenerLikesDesdeIndexedDB) {
                         // Inicializar los arrays para los matches y los likes
                         const matches = [];
                         const likes = [];
-                        filteredLikes.forEach(like => {
-                            // Comprobar si los campos están completos para evitar crear tarjetas vacías
-                            if (like.email1 && like.email2) {
-                                const likeElement = document.createElement('div');
-                                likeElement.classList.add('col-12', 'col-md-6', 'mb-4'); // Clases de Bootstrap para organizar los elementos
-                                if (like.email1 === loggedInUser.email && likes.some(otherLike => otherLike.email1 === like.email2 && otherLike.email2 === loggedInUser.email)) {
-                                    // Si es un "match", almacenamos ambos usuarios en el array de matches
-                                    matches.push({user1: like.email1, user2: like.email2});
-                                } else if (like.email2 === loggedInUser.email) {
-                                    // Si solo hay un "me gusta", almacenamos en el array de likes
-                                    likes.push(like.email1);  // Almacenamos el email del usuario que le ha dado like
-                                }
+filteredLikes.forEach(like => {
+    if (like.email1 && like.email2) {
+        if (
+            like.email1 === loggedInUser.email &&
+            filteredLikes.some(otherLike => otherLike.email1 === like.email2 && otherLike.email2 === loggedInUser.email)
+        ) {
+            // Es un match
+            matches.push({ user1: like.email1, user2: like.email2 });
+        } else if (like.email2 === loggedInUser.email) {
+            // Es un like hacia el usuario logueado
+            likes.push(like.email1);
+        }
+    }
+});
 
-                            }
-                        });
+// Filtrar los likes para excluir usuarios que ya están en matches
+const matchEmails = matches.map(match => match.user2); // Emails del otro usuario en los matches
+const filteredLikesWithoutMatches = likes.filter(email => !matchEmails.includes(email)); // Filtrar likes
                         console.log(likes);
                         console.log(matches);
                         // Recorremos los matches primero
@@ -67,7 +70,7 @@ export function cargarLikes(obtenerLikesDesdeIndexedDB) {
                         });
 
 // Recorremos los likes
-                        likes.forEach(likeEmail => {
+                        filteredLikesWithoutMatches.forEach(likeEmail => {
                             const likeElement = document.createElement("div");
                             likeElement.classList.add("col-12", "col-md-6", "mb-4");
 
@@ -392,7 +395,7 @@ export function cargarFotoYMensajeBienvenida(obtenerUsuariosDesdeIndexedDB) {
                 // Mostrar mensaje de bienvenida
                 const welcomeMessage = document.getElementById('welcomeMessage');
                 if (loggedInUser) {
-                    welcomeMessage.textContent = `Bienvenido, ${user.nombre || "Usuario"} `;
+                    welcomeMessage.textContent = `Hola, ${user.nombre || "Usuario"} `;
                 }
                 // Si el usuario tiene una foto en base64, mostrarla
                 const userPhoto = document.getElementById('userPhoto');
