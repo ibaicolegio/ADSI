@@ -13,12 +13,22 @@
                         Búsqueda
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="busquedaDropdown">
-                        <li><a href="#" class="nav-link dropdown-item" data-view="views/busqueda.html">Búsqueda</a></li>
+                        <li><a href="#" class="nav-link dropdown-item" data-view="views/busqueda.html">Búscar por afición</a></li>
                         <li><a href="#" class="nav-link dropdown-item" data-view="views/geolocalizacion.html">Geolocalización</a></li>
                     </ul>
                 </li>
                 <li><a href="#" class="nav-link px-2 link-secondary" data-view="views/modificarPerfil.html">Modificar perfil</a></li>
-                <li><a href="#" class="nav-link px-2 link-secondary" data-view="views/aficiones.html">Aficiones</a></li>
+                <!-- Desplegable para Aficiones -->
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle px-2 link-secondary" id="aficionesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Aficiones
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="aficionesDropdown">
+                        <li><a href="#" class="nav-link dropdown-item" data-view="views/verAficiones.html">Ver</a></li>
+                        <li><a href="#" class="nav-link dropdown-item" data-view="views/añadirAficiones.html">Añadir</a></li>
+                        <li><a href="#" class="nav-link dropdown-item" data-view="views/eliminarAficiones.html">Eliminar</a></li>
+                    </ul>
+                </li>
                 <li><a href="#" class="nav-link px-2 link-secondary" data-view="views/verLikes.html">Ver likes</a></li>
             </ul>
 

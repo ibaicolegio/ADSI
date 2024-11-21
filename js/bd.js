@@ -160,3 +160,20 @@ export function obtenerLikesDesdeIndexedDB() {
         };
     });
 }
+
+export function obtenerAficionesUsuarioDesdeIndexedDB() {
+    return new Promise((resolve, reject) => {
+        const dbRequest = indexedDB.open("miBaseDeDatos", 1);
+
+        dbRequest.onerror = () => reject("No se pudo abrir la base de datos.");
+        dbRequest.onsuccess = (event) => {
+            const db = event.target.result;
+            const transaction = db.transaction(["aficiones"], "readonly");
+            const store = transaction.objectStore("aficiones");
+
+            const getAllRequest = store.getAll();
+            getAllRequest.onsuccess = () => resolve(getAllRequest.result);
+            getAllRequest.onerror = () => reject("Error al obtener las aficiones.");
+        };
+    });
+}

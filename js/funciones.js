@@ -414,3 +414,66 @@ export function cargarFotoYMensajeBienvenida(obtenerUsuariosDesdeIndexedDB) {
     }
 }
 
+export function cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB) {
+    const aficionesSelect = document.getElementById("aficionesSelect"); // Elemento select
+    const aficionDetails = document.getElementById("aficionDetails"); // Contenedor para detalles
+
+    if (!aficionesSelect || !aficionDetails) {
+        console.error("Los elementos necesarios no se encontraron en la vista.");
+        return;
+    }
+
+    // Obtener aficiones del usuario desde IndexedDB
+    obtenerAficionesUsuarioDesdeIndexedDB()
+        .then((aficiones) => {
+            // Limpiar contenido previo
+            aficionesSelect.innerHTML = `<option value="" disabled selected>Selecciona una afición</option>`;
+            aficionDetails.innerHTML = ""; // Limpiar detalles previos
+
+            if (aficiones && aficiones.length > 0) {
+                aficiones.forEach((aficion, index) => {
+                    // Añadir cada afición como opción en el select
+                    const option = document.createElement("option");
+                    option.value = index; // Usar índice como valor único
+                    option.textContent = aficion.nombre;
+                    aficionesSelect.appendChild(option);
+                });
+
+                // Manejar el evento de selección
+                aficionesSelect.addEventListener("change", (event) => {
+                    const selectedIndex = event.target.value;
+                    const selectedAficion = aficiones[selectedIndex];
+
+                    if (selectedAficion) {
+                        // Mostrar detalles de la afición seleccionada
+                        aficionDetails.innerHTML = `
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">${selectedAficion.nombre}</h5>
+                                    <p class="card-text">${selectedAficion.descripcion}</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+            } else {
+                // Mostrar mensaje si no hay aficiones
+                aficionesSelect.innerHTML = `<option value="" disabled>No tienes aficiones registradas</option>`;
+                aficionDetails.innerHTML = `
+                    <div class="alert alert-info text-center" role="alert">
+                        No tienes aficiones registradas.
+                    </div>
+                `;
+            }
+        })
+        .catch((error) => {
+            console.error("Error al cargar las aficiones desde IndexedDB:", error);
+            aficionesSelect.innerHTML = `<option value="" disabled>Error al cargar aficiones</option>`;
+            aficionDetails.innerHTML = `
+                <div class="alert alert-danger text-center" role="alert">
+                    Hubo un problema al cargar tus aficiones. Por favor, inténtalo más tarde.
+                </div>
+            `;
+        });
+}
+

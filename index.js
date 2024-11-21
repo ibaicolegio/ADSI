@@ -1,5 +1,5 @@
-import {cargarLikes, login, buscar, cargarFotoYMensajeBienvenida} from "./js/funciones.js";
-import {cargarYAlmacenarDatos, obtenerUsuariosDesdeIndexedDB, obtenerLikesDesdeIndexedDB} from "./js/bd.js";
+import {cargarLikes, login, buscar, cargarFotoYMensajeBienvenida, cargarAficiones} from "./js/funciones.js";
+import {cargarYAlmacenarDatos, obtenerUsuariosDesdeIndexedDB, obtenerLikesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB} from "./js/bd.js";
 // Objeto para almacenar las páginas cargadas
 const cache = {};
 
@@ -153,6 +153,10 @@ function loadPaginaUsuario() {
                                     console.log(view);
                                     buscar(obtenerUsuariosDesdeIndexedDB, content);
                                 }
+                                if (view === "views/verAficion.html") {
+                                                console.log(view);
+                                                cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB);
+                                }
                             } else {
                                 fetch(view)
                                         .then((response) => {
@@ -170,6 +174,10 @@ function loadPaginaUsuario() {
                                             if (view === "views/busqueda.html") {
                                                 console.log(view);
                                                 buscar(obtenerUsuariosDesdeIndexedDB, content);
+                                            }
+                                            if (view === "views/verAficion.html") {
+                                                console.log(view);
+                                                cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB);
                                             }
                                         })
                                         .catch((error) => {
