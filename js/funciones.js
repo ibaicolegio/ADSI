@@ -22,26 +22,27 @@ export function cargarLikes(obtenerLikesDesdeIndexedDB) {
                         // Inicializar los arrays para los matches y los likes
                         const matches = [];
                         const likes = [];
-filteredLikes.forEach(like => {
-    if (like.email1 && like.email2) {
-        if (
-            like.email1 === loggedInUser.email &&
-            filteredLikes.some(otherLike => otherLike.email1 === like.email2 && otherLike.email2 === loggedInUser.email)
-        ) {
-            // Es un match
-            matches.push({ user1: like.email1, user2: like.email2 });
-        } else if (like.email2 === loggedInUser.email) {
-            // Es un like hacia el usuario logueado
-            likes.push(like.email1);
-        }
-    }
-});
+                        filteredLikes.forEach(like => {
+                            if (like.email1 && like.email2) {
+                                if (
+                                    like.email1 === loggedInUser.email &&
+                                    filteredLikes.some(otherLike => otherLike.email1 === like.email2 && otherLike.email2 === loggedInUser.email)
+                                ) {
+                                    // Es un match
+                                    matches.push({ user1: like.email1, user2: like.email2 });
+                                } else if (like.email2 === loggedInUser.email) {
+                                    // Es un like hacia el usuario logueado
+                                    likes.push(like.email1);
+                                }
+                            }
+                        });
 
-// Filtrar los likes para excluir usuarios que ya están en matches
-const matchEmails = matches.map(match => match.user2); // Emails del otro usuario en los matches
-const filteredLikesWithoutMatches = likes.filter(email => !matchEmails.includes(email)); // Filtrar likes
+                        // Filtrar los likes para excluir usuarios que ya están en matches
+                        const matchEmails = matches.map(match => match.user2); // Emails del otro usuario en los matches
+                        const filteredLikesWithoutMatches = likes.filter(email => !matchEmails.includes(email)); // Filtrar likes
                         console.log(likes);
                         console.log(matches);
+
                         // Recorremos los matches primero
                         matches.forEach(match => {
                             const likeElement = document.createElement("div");
@@ -50,17 +51,15 @@ const filteredLikesWithoutMatches = likes.filter(email => !matchEmails.includes(
                             // Crear mensaje de match
                             const matchMessage = `¡Es un match con ${match.user2}! Ambos se gustan.`;
 
-                            likeElement.innerHTML = `
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">${matchMessage}</h5>
-                <p class="card-text">
-                    ¡Estás en su lista de favoritos! Conecta con ellos y conoce más.
-                </p>
-                <a href="#" class="btn btn-primary">Ver perfil</a>
-            </div>
+likeElement.innerHTML = `
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">${matchMessage} <i class="fa fa-heart" style="color: red;"></i></h5>
+            <p class="card-text">¡Estás en su lista de favoritos! Conecta con ellos y conoce más.</p>
+            <a href="#" class="btn btn-primary">Ver perfil</a>
         </div>
-    `;
+    </div>
+`;
 
                             // Añadir el elemento al contenedor si tiene mensaje
                             if (matchMessage !== "") {
@@ -69,7 +68,7 @@ const filteredLikesWithoutMatches = likes.filter(email => !matchEmails.includes(
                             }
                         });
 
-// Recorremos los likes
+                        // Recorremos los likes
                         filteredLikesWithoutMatches.forEach(likeEmail => {
                             const likeElement = document.createElement("div");
                             likeElement.classList.add("col-12", "col-md-6", "mb-4");
@@ -414,66 +413,48 @@ export function cargarFotoYMensajeBienvenida(obtenerUsuariosDesdeIndexedDB) {
     }
 }
 
-export function cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB) {
-    const aficionesSelect = document.getElementById("aficionesSelect"); // Elemento select
-    const aficionDetails = document.getElementById("aficionDetails"); // Contenedor para detalles
-
-    if (!aficionesSelect || !aficionDetails) {
-        console.error("Los elementos necesarios no se encontraron en la vista.");
-        return;
-    }
-
-    // Obtener aficiones del usuario desde IndexedDB
+export function cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, content) {
+    // Obtener las aficiones desde IndexedDB
     obtenerAficionesUsuarioDesdeIndexedDB()
-        .then((aficiones) => {
-            // Limpiar contenido previo
-            aficionesSelect.innerHTML = `<option value="" disabled selected>Selecciona una afición</option>`;
-            aficionDetails.innerHTML = ""; // Limpiar detalles previos
+        .then(aficiones => {
+            // Crear el contenedor para mostrar las aficiones
+            const aficionesContainer = document.createElement("div");
+            aficionesContainer.classList.add("row", "g-3");
 
-            if (aficiones && aficiones.length > 0) {
-                aficiones.forEach((aficion, index) => {
-                    // Añadir cada afición como opción en el select
-                    const option = document.createElement("option");
-                    option.value = index; // Usar índice como valor único
-                    option.textContent = aficion.nombre;
-                    aficionesSelect.appendChild(option);
-                });
+            aficiones.forEach(aficion => {
+                // Crear un contenedor para cada afición (con tarjeta)
+                const aficionContainer = document.createElement("div");
+                aficionContainer.classList.add("aficion-item", "col-md-3");  // Cuatro ítems por fila en pantallas medianas
 
-                // Manejar el evento de selección
-                aficionesSelect.addEventListener("change", (event) => {
-                    const selectedIndex = event.target.value;
-                    const selectedAficion = aficiones[selectedIndex];
+                // Crear el input (checkbox)
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.name = "aficiones";
+                checkbox.value = aficion;
+                checkbox.id = `aficion-${aficion.toLowerCase()}`;
+                checkbox.classList.add("form-check-input", "me-2");
 
-                    if (selectedAficion) {
-                        // Mostrar detalles de la afición seleccionada
-                        aficionDetails.innerHTML = `
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">${selectedAficion.nombre}</h5>
-                                    <p class="card-text">${selectedAficion.descripcion}</p>
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-            } else {
-                // Mostrar mensaje si no hay aficiones
-                aficionesSelect.innerHTML = `<option value="" disabled>No tienes aficiones registradas</option>`;
-                aficionDetails.innerHTML = `
-                    <div class="alert alert-info text-center" role="alert">
-                        No tienes aficiones registradas.
-                    </div>
-                `;
-            }
+                // Crear la etiqueta para el checkbox
+                const label = document.createElement("label");
+                label.htmlFor = checkbox.id;
+                label.textContent = aficion;
+                label.classList.add("form-check-label");
+
+                // Añadir el checkbox y la etiqueta al contenedor de la afición
+                aficionContainer.appendChild(checkbox);
+                aficionContainer.appendChild(label);
+
+                // Añadir el contenedor al contenedor principal de aficiones
+                aficionesContainer.appendChild(aficionContainer);
+            });
+
+            // Limpiar el contenido anterior de "main" y añadir el nuevo contenido
+            content.innerHTML = '';  // Limpiar el contenido previo de la página
+            content.appendChild(aficionesContainer);  // Insertar las aficiones al contenido
+
         })
-        .catch((error) => {
-            console.error("Error al cargar las aficiones desde IndexedDB:", error);
-            aficionesSelect.innerHTML = `<option value="" disabled>Error al cargar aficiones</option>`;
-            aficionDetails.innerHTML = `
-                <div class="alert alert-danger text-center" role="alert">
-                    Hubo un problema al cargar tus aficiones. Por favor, inténtalo más tarde.
-                </div>
-            `;
+        .catch(error => {
+            console.error("Error al cargar las aficiones:", error);
+            content.innerHTML = `<p>Error al cargar las aficiones.</p>`;  // Mensaje de error
         });
 }
-

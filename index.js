@@ -155,7 +155,7 @@ function loadPaginaUsuario() {
                                 }
                                 if (view === "views/verAficion.html") {
                                                 console.log(view);
-                                                cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB);
+                                                cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, content);
                                 }
                             } else {
                                 fetch(view)
@@ -177,7 +177,7 @@ function loadPaginaUsuario() {
                                             }
                                             if (view === "views/verAficion.html") {
                                                 console.log(view);
-                                                cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB);
+                                                cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, content);
                                             }
                                         })
                                         .catch((error) => {
