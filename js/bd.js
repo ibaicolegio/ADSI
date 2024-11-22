@@ -175,36 +175,52 @@ export function obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario) {
             // Obtener las aficiones del usuario por su email
             const userAficionesRequest = usuarioAficionStore.getAll();
             userAficionesRequest.onsuccess = function () {
-                const userAficiones = userAficionesRequest.result.filter(
-                    (item) => item.email === emailUsuario
-                );
+                const allUserAficiones = userAficionesRequest.result;
+                console.log("Todos los registros en usuario_aficion:", allUserAficiones);
+
+                // Filtrar los registros asociados al usuario
+                const userAficiones = allUserAficiones.filter((item) => {
+                    const emailBD = item.email?.trim().toLowerCase();
+                    const emailFiltrado = emailUsuario?.trim().toLowerCase();
+                    console.log(`Comparando "${emailBD}" con "${emailFiltrado}"`);
+                    return emailBD === emailFiltrado;
+                });
+
+                console.log(`Registros filtrados para ${emailUsuario}:`, userAficiones);
 
                 if (userAficiones.length > 0) {
-                    // Obtener los ID de las aficiones
-                    const aficionIds = userAficiones[0].idAficion;
+                    // Convertir IDs de aficiones a cadenas
+                    const aficionIds = Array.isArray(userAficiones[0].idAficion)
+                        ? userAficiones[0].idAficion.map(String)
+                        : [String(userAficiones[0].idAficion)];
+                    console.log("IDs de aficiones del usuario:", aficionIds);
 
-                    // Obtener todas las aficiones usando los IDs
+                    // Obtener todas las aficiones
                     const aficionesRequest = aficionesStore.getAll();
                     aficionesRequest.onsuccess = function () {
-                        // Filtrar las aficiones para solo obtener aquellas cuyo ID esté en el array aficionIds
-                        const aficiones = aficionesRequest.result.filter((aficion) =>
-                            aficionIds.includes(aficion.idAficion)
+                        const allAficiones = aficionesRequest.result;
+                        console.log("Todas las aficiones en el almacén:", allAficiones);
+
+                        // Filtrar las aficiones asociadas al usuario
+                        const aficiones = allAficiones.filter((aficion) =>
+                            aficionIds.includes(String(aficion.idAficion))
                         );
-                        
-                        // Ahora necesitamos asegurarnos de que las aficiones tienen un nombre o valor legible
+                        console.log("Aficiones del usuario con nombres:", aficiones);
+
+                        // Devolver aficiones con nombres
                         const aficionesConNombre = aficiones.map((aficion) => ({
                             idAficion: aficion.idAficion,
-                            nombre: aficion.nombreAficion || "Afición sin nombre" // Asegúrate de que tiene un nombre
+                            nombre: aficion.nombreAficion || "Afición sin nombre"
                         }));
-                        
-                        resolve(aficionesConNombre); // Devolvemos las aficiones con nombres
+                        resolve(aficionesConNombre);
                     };
 
                     aficionesRequest.onerror = function (event) {
                         reject("Error al obtener las aficiones: " + event.target.error);
                     };
                 } else {
-                    resolve([]); // No hay aficiones asociadas al usuario
+                    console.log(`No se encontraron aficiones para el usuario ${emailUsuario}`);
+                    resolve([]);
                 }
             };
 
@@ -219,6 +235,34 @@ export function obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario) {
     });
 }
 
+export function obtenerAficionesDesdeIndexedDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open("VitoMaite09", 1);
 
+        request.onsuccess = function(event) {
+            const db = event.target.result;
+            console.log("Base de datos abierta con éxito:", db);  // Verificar que la base de datos se abrió correctamente
+
+            const transaction = db.transaction("aficiones", "readonly");  // Accede al almacén "aficiones"
+            const objectStore = transaction.objectStore("aficiones");
+            const allAficionesRequest = objectStore.getAll();  // Recupera todas las aficiones
+
+            allAficionesRequest.onsuccess = function() {
+                console.log("Aficiones recuperadas:", allAficionesRequest.result);  // Verificar si se recuperan las aficiones
+                resolve(allAficionesRequest.result); // Devuelve todas las aficiones
+            };
+
+            allAficionesRequest.onerror = function(event) {
+                console.error("Error al obtener las aficiones:", event.target.error);  // Verificar si ocurre un error
+                reject("Error al obtener las aficiones: " + event.target.error);
+            };
+        };
+
+        request.onerror = function(event) {
+            console.error("Error al abrir IndexedDB:", event.target.error);  // Verificar si ocurre un error al abrir la base de datos
+            reject("Error al abrir IndexedDB: " + event.target.error);
+        };
+    });
+}
 
 

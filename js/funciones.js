@@ -487,3 +487,57 @@ export function cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, content) 
         });
 }
 
+export function añadirAficion(obtenerTodasAficiones, obtenerAficionesUsuario) {
+    const userEmail = sessionStorage.getItem("userLoggedIn");
+
+    if (!userEmail) {
+        console.error("No hay un usuario autenticado.");
+        return;
+    }
+
+    Promise.all([
+        obtenerTodasAficiones(),
+        obtenerAficionesUsuario(userEmail)
+    ])
+    .then(([todasAficiones, aficionesUsuario]) => {
+        console.log("Aficiones del usuario:", aficionesUsuario); // Verificar datos
+        console.log("Todas las aficiones:", todasAficiones);
+
+        const aficionesUsuarioIds = aficionesUsuario.map((a) => a.idAficion);
+        console.log("IDs de aficiones del usuario:", aficionesUsuarioIds);
+
+        const aficionesDisponibles = todasAficiones.filter(
+            (aficion) => !aficionesUsuarioIds.includes(aficion.idAficion)
+        );
+        console.log("Aficiones disponibles después del filtro:", aficionesDisponibles);
+
+        const container = document.getElementById("aficionesCheckboxContainer");
+        container.innerHTML = "";
+
+        aficionesDisponibles.forEach((aficion) => {
+            const colDiv = document.createElement("div");
+            colDiv.className = "col-md-4 mb-3";
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.id = `aficion-${aficion.idAficion}`;
+            checkbox.value = aficion.idAficion;
+            checkbox.className = "form-check-input";
+
+            const label = document.createElement("label");
+            label.htmlFor = `aficion-${aficion.idAficion}`;
+            label.textContent = aficion.nombreAficion;
+            label.className = "form-check-label";
+
+            colDiv.appendChild(checkbox);
+            colDiv.appendChild(label);
+            container.appendChild(colDiv);
+        });
+
+        const mensaje = document.getElementById("mensajeAficiones");
+        mensaje.innerHTML = "";
+    })
+    .catch((error) => {
+        console.error("Error al obtener aficiones:", error);
+    });
+}

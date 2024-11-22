@@ -1,5 +1,5 @@
-import {cargarLikes, login, buscar, cargarFotoYMensajeBienvenida, cargarAficiones} from "./js/funciones.js";
-import {cargarYAlmacenarDatos, obtenerUsuariosDesdeIndexedDB, obtenerLikesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB} from "./js/bd.js";
+import {cargarLikes, login, buscar, cargarFotoYMensajeBienvenida, cargarAficiones, añadirAficion} from "./js/funciones.js";
+import {cargarYAlmacenarDatos, obtenerUsuariosDesdeIndexedDB, obtenerLikesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, obtenerAficionesDesdeIndexedDB} from "./js/bd.js";
 // Objeto para almacenar las páginas cargadas
 const cache = {};
 
@@ -151,6 +151,11 @@ function loadPaginaUsuario() {
                                                 console.log(view);
                                                 cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, content);
                                 }
+                                if (view === "views/añadirAficion.html") {
+                                                console.log(view);
+                                                añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB);
+                                            }
+                            
                             } else {
                                 fetch(view)
                                         .then((response) => {
@@ -173,6 +178,11 @@ function loadPaginaUsuario() {
                                                 console.log(view);
                                                 cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, content);
                                             }
+                                           if (view === "views/añadirAficion.html") {
+                                                console.log(view);
+                                                añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB);
+                                            }
+                                            
                                         })
                                         .catch((error) => {
                                             content.innerHTML = `<p>Error: ${error.message}</p>`;
