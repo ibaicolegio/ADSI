@@ -1,5 +1,5 @@
-import {cargarLikes, login, buscar, cargarFotoYMensajeBienvenida, cargarAficiones, añadirAficion} from "./js/funciones.js";
-import {cargarYAlmacenarDatos, obtenerUsuariosDesdeIndexedDB, obtenerLikesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, obtenerAficionesDesdeIndexedDB} from "./js/bd.js";
+import {cargarLikes, login, buscar, cargarFotoYMensajeBienvenida, cargarAficiones, añadirAficion, eliminarAficion} from "./js/funciones.js";
+import {openIndexedDB, cargarYAlmacenarDatos, obtenerUsuariosDesdeIndexedDB, obtenerLikesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, obtenerAficionesDesdeIndexedDB} from "./js/bd.js";
 // Objeto para almacenar las páginas cargadas
 const cache = {};
 
@@ -153,8 +153,13 @@ function loadPaginaUsuario() {
                                 }
                                 if (view === "views/añadirAficion.html") {
                                                 console.log(view);
-                                                añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB);
-                                            }
+                                                añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, openIndexedDB);
+                                }
+                                if (view === "views/eliminarAficion.html") {
+                                                console.log(view);
+                                                eliminarAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, openIndexedDB);
+                                }
+                                            
                             
                             } else {
                                 fetch(view)
@@ -180,7 +185,11 @@ function loadPaginaUsuario() {
                                             }
                                            if (view === "views/añadirAficion.html") {
                                                 console.log(view);
-                                                añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB);
+                                                añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, openIndexedDB);
+                                            }
+                                            if (view === "views/eliminarAficion.html") {
+                                                console.log(view);
+                                                eliminarAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, openIndexedDB);
                                             }
                                             
                                         })

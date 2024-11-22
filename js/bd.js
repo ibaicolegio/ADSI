@@ -1,5 +1,5 @@
 // Función para abrir o crear la base de datos IndexedDB
-function openIndexedDB() {
+export function openIndexedDB() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open('VitoMaite09', 1);  // Abre o crea la base de datos
 
@@ -235,32 +235,28 @@ export function obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario) {
     });
 }
 
+// Función para obtener todas las aficiones desde IndexedDB
 export function obtenerAficionesDesdeIndexedDB() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open("VitoMaite09", 1);
 
         request.onsuccess = function(event) {
             const db = event.target.result;
-            console.log("Base de datos abierta con éxito:", db);  // Verificar que la base de datos se abrió correctamente
+            const transaction = db.transaction("aficiones", "readonly");
+            const store = transaction.objectStore("aficiones");
+            const getAllRequest = store.getAll();
 
-            const transaction = db.transaction("aficiones", "readonly");  // Accede al almacén "aficiones"
-            const objectStore = transaction.objectStore("aficiones");
-            const allAficionesRequest = objectStore.getAll();  // Recupera todas las aficiones
-
-            allAficionesRequest.onsuccess = function() {
-                console.log("Aficiones recuperadas:", allAficionesRequest.result);  // Verificar si se recuperan las aficiones
-                resolve(allAficionesRequest.result); // Devuelve todas las aficiones
+            getAllRequest.onsuccess = function() {
+                resolve(getAllRequest.result);
             };
 
-            allAficionesRequest.onerror = function(event) {
-                console.error("Error al obtener las aficiones:", event.target.error);  // Verificar si ocurre un error
-                reject("Error al obtener las aficiones: " + event.target.error);
+            getAllRequest.onerror = function(event) {
+                reject("Error al obtener todas las aficiones: " + event.target.error);
             };
         };
 
         request.onerror = function(event) {
-            console.error("Error al abrir IndexedDB:", event.target.error);  // Verificar si ocurre un error al abrir la base de datos
-            reject("Error al abrir IndexedDB: " + event.target.error);
+            reject("Error al abrir la base de datos IndexedDB: " + event.target.error);
         };
     });
 }

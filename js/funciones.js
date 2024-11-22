@@ -487,57 +487,239 @@ export function cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, content) 
         });
 }
 
-export function añadirAficion(obtenerTodasAficiones, obtenerAficionesUsuario) {
-    const userEmail = sessionStorage.getItem("userLoggedIn");
+export function añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, openIndexedDB) {
+    const loggedInUser = JSON.parse(sessionStorage.getItem("userLoggedIn"));
+    const emailUsuario = loggedInUser?.email;
 
-    if (!userEmail) {
-        console.error("No hay un usuario autenticado.");
+    if (!emailUsuario) {
+        console.error("Error: No se encontró el usuario logueado.");
         return;
     }
 
+    const checkboxContainer = document.getElementById("aficionesCheckboxContainer");
+    const guardarAficionesButton = document.getElementById("guardarAficionesButton");
+
+    if (!checkboxContainer || !guardarAficionesButton) {
+        console.error("Elementos necesarios no encontrados en el DOM.");
+        return;
+    }
+
+    checkboxContainer.innerHTML = ""; // Clear any existing checkboxes
+
     Promise.all([
-        obtenerTodasAficiones(),
-        obtenerAficionesUsuario(userEmail)
+        obtenerAficionesDesdeIndexedDB(),
+        obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario)
     ])
     .then(([todasAficiones, aficionesUsuario]) => {
-        console.log("Aficiones del usuario:", aficionesUsuario); // Verificar datos
-        console.log("Todas las aficiones:", todasAficiones);
+        const idsAficionesUsuario = aficionesUsuario.map(aficion => aficion.idAficion);
+        const aficionesDisponibles = todasAficiones.filter(aficion => !idsAficionesUsuario.includes(aficion.idAficion));
 
-        const aficionesUsuarioIds = aficionesUsuario.map((a) => a.idAficion);
-        console.log("IDs de aficiones del usuario:", aficionesUsuarioIds);
+        if (aficionesDisponibles.length === 0) {
+            checkboxContainer.innerHTML = "<p>No hay aficiones disponibles para añadir.</p>";
+            guardarAficionesButton.style.display = "none";
+            return;
+        }
 
-        const aficionesDisponibles = todasAficiones.filter(
-            (aficion) => !aficionesUsuarioIds.includes(aficion.idAficion)
-        );
-        console.log("Aficiones disponibles después del filtro:", aficionesDisponibles);
+        crearCheckboxes(aficionesDisponibles, checkboxContainer);
+        guardarAficionesButton.style.display = "block";
 
-        const container = document.getElementById("aficionesCheckboxContainer");
-        container.innerHTML = "";
+        guardarAficionesButton.removeEventListener("click", guardarAficionesEventHandler); // Remove any previous handlers
+        guardarAficionesButton.addEventListener("click", guardarAficionesEventHandler);
 
-        aficionesDisponibles.forEach((aficion) => {
-            const colDiv = document.createElement("div");
-            colDiv.className = "col-md-4 mb-3";
+        function guardarAficionesEventHandler() {
+            const checkboxes = checkboxContainer.querySelectorAll("input[type='checkbox']");
+            const seleccionadas = Array.from(checkboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => Number(checkbox.value)); // Ensure values are numbers
+
+            if (seleccionadas.length === 0) {
+                alert("No has seleccionado ninguna afición.");
+                return;
+            }
+
+            openIndexedDB().then(db => {
+                const transaction = db.transaction("usuario_aficion", "readwrite");
+                const store = transaction.objectStore("usuario_aficion");
+
+                const existingRequest = store.getAll();
+                existingRequest.onsuccess = () => {
+                    const existingAficiones = existingRequest.result.filter(item => item.email === emailUsuario);
+                    const existingIds = existingAficiones.map(item => Number(item.idAficion));
+
+                    const nuevasAficiones = seleccionadas.filter(idAficion => !existingIds.includes(idAficion));
+
+                    if (nuevasAficiones.length === 0) {
+                        alert("Todas las aficiones seleccionadas ya están registradas.");
+                        return;
+                    }
+
+                    nuevasAficiones.forEach(idAficion => {
+                        store.put({ email: emailUsuario, idAficion });
+                    });
+
+                    transaction.oncomplete = () => {
+                        alert("¡Aficiones añadidas exitosamente!");
+                        cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, document.getElementById("main"));
+                    };
+
+                    transaction.onerror = event => {
+                        console.error("Error al guardar aficiones en IndexedDB:", event.target.error);
+                    };
+                };
+
+                existingRequest.onerror = event => {
+                    console.error("Error al obtener las aficiones existentes del usuario:", event.target.error);
+                };
+            }).catch(error => {
+                console.error("Error al abrir IndexedDB:", error);
+            });
+        }
+
+        function crearCheckboxes(aficionesDisponibles, container) {
+            aficionesDisponibles.forEach(aficion => {
+                const checkboxDiv = document.createElement("div");
+                checkboxDiv.classList.add("col-6", "mb-2");
+
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.id = `aficion-${aficion.idAficion}`;
+                checkbox.value = aficion.idAficion;
+                checkbox.classList.add("form-check-input");
+
+                const label = document.createElement("label");
+                label.htmlFor = `aficion-${aficion.idAficion}`;
+                label.classList.add("form-check-label");
+                label.textContent = aficion.nombreAficion;
+
+                checkboxDiv.appendChild(checkbox);
+                checkboxDiv.appendChild(label);
+                container.appendChild(checkboxDiv);
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Error al cargar aficiones o aficiones de usuario:", error);
+    });
+}
+
+
+export function eliminarAficion(obtenerAficionesUsuarioDesdeIndexedDB, openIndexedDB) {
+    const loggedInUser = JSON.parse(sessionStorage.getItem("userLoggedIn"));
+    const emailUsuario = loggedInUser?.email;
+
+    if (!emailUsuario) {
+        console.error("Error: No se encontró el usuario logueado.");
+        return;
+    }
+
+    const checkboxContainer = document.getElementById("aficionesCheckboxContainer");
+    const eliminarAficionesButton = document.getElementById("eliminarAficionesButton");
+
+    if (!checkboxContainer || !eliminarAficionesButton) {
+        console.error("Elementos necesarios no encontrados en el DOM.");
+        return;
+    }
+
+    // Limpiar contenedor de checkboxes
+    checkboxContainer.innerHTML = "";
+
+    // Obtener las aficiones del usuario desde IndexedDB
+    obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario)
+    .then(aficionesUsuario => {
+        if (aficionesUsuario.length === 0) {
+            checkboxContainer.innerHTML = "<p>No tienes aficiones para eliminar.</p>";
+            eliminarAficionesButton.style.display = "none";
+            return;
+        }
+
+        // Crear checkboxes para las aficiones del usuario
+        aficionesUsuario.forEach(aficion => {
+            const checkboxDiv = document.createElement("div");
+            checkboxDiv.classList.add("col-6", "mb-2");
 
             const checkbox = document.createElement("input");
             checkbox.type = "checkbox";
             checkbox.id = `aficion-${aficion.idAficion}`;
             checkbox.value = aficion.idAficion;
-            checkbox.className = "form-check-input";
+            checkbox.classList.add("form-check-input");
 
             const label = document.createElement("label");
             label.htmlFor = `aficion-${aficion.idAficion}`;
+            label.classList.add("form-check-label");
             label.textContent = aficion.nombreAficion;
-            label.className = "form-check-label";
 
-            colDiv.appendChild(checkbox);
-            colDiv.appendChild(label);
-            container.appendChild(colDiv);
+            checkboxDiv.appendChild(checkbox);
+            checkboxDiv.appendChild(label);
+            checkboxContainer.appendChild(checkboxDiv);
         });
 
-        const mensaje = document.getElementById("mensajeAficiones");
-        mensaje.innerHTML = "";
+        // Mostrar el botón para eliminar aficiones
+        eliminarAficionesButton.style.display = "block";
+
+        // Limpiar eventos previos del botón
+        eliminarAficionesButton.replaceWith(eliminarAficionesButton.cloneNode(true));
+        const nuevoEliminarButton = document.getElementById("eliminarAficionesButton");
+
+        // Registrar evento para eliminar las aficiones seleccionadas
+        nuevoEliminarButton.addEventListener("click", () => {
+            const checkboxes = checkboxContainer.querySelectorAll("input[type='checkbox']");
+            const seleccionadas = Array.from(checkboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => Number(checkbox.value)); // Convertir valores a números
+
+            if (seleccionadas.length === 0) {
+                alert("No has seleccionado ninguna afición para eliminar.");
+                return;
+            }
+
+            openIndexedDB().then(db => {
+                const transaction = db.transaction("usuario_aficion", "readwrite");
+                const store = transaction.objectStore("usuario_aficion");
+
+                // Obtener las aficiones existentes del usuario
+                const existingRequest = store.getAll();
+                existingRequest.onsuccess = () => {
+                    const existingAficiones = existingRequest.result.filter(item => item.email === emailUsuario);
+                    const existingIds = existingAficiones.map(item => Number(item.idAficion));
+
+                    // Filtrar las aficiones seleccionadas que se deben eliminar
+                    const aficionesAEliminar = seleccionadas.filter(idAficion => existingIds.includes(idAficion));
+
+                    if (aficionesAEliminar.length === 0) {
+                        alert("No has seleccionado aficiones válidas para eliminar.");
+                        return;
+                    }
+
+                    // Eliminar las aficiones seleccionadas
+                    aficionesAEliminar.forEach(idAficion => {
+                        const request = store.delete(idAficion); // Eliminar por id
+                        request.onsuccess = () => {
+                            console.log(`Afición con ID ${idAficion} eliminada.`);
+                        };
+                        request.onerror = event => {
+                            console.error(`Error al eliminar la afición con ID ${idAficion}:`, event.target.error);
+                        };
+                    });
+
+                    transaction.oncomplete = () => {
+                        alert("¡Aficiones eliminadas exitosamente!");
+                        cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, document.getElementById("main"));
+                    };
+
+                    transaction.onerror = event => {
+                        console.error("Error al eliminar aficiones en IndexedDB:", event.target.error);
+                    };
+                };
+
+                existingRequest.onerror = event => {
+                    console.error("Error al obtener las aficiones existentes del usuario:", event.target.error);
+                };
+            }).catch(error => {
+                console.error("Error al abrir IndexedDB:", error);
+            });
+        });
     })
-    .catch((error) => {
-        console.error("Error al obtener aficiones:", error);
+    .catch(error => {
+        console.error("Error al cargar las aficiones del usuario:", error);
     });
 }
