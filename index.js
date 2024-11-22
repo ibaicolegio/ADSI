@@ -110,12 +110,6 @@ function loadPaginaUsuario() {
                 const links = document.querySelectorAll("header .nav-link");
                 const content = document.getElementById("main");
 
-                // Mostrar saludo con el nombre del usuario
-                /*const welcomeMessage = document.getElementById("welcomeMessage");
-                 const loggedInUser = JSON.parse(sessionStorage.getItem("userLoggedIn"));
-                 if (loggedInUser) {
-                 welcomeMessage.textContent = `Hola, ${loggedInUser.nombre}`;
-                 }*/
                 cargarFotoYMensajeBienvenida(obtenerUsuariosDesdeIndexedDB);
 
                 // Agregar funcionalidad al botón de logout

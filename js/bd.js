@@ -161,19 +161,64 @@ export function obtenerLikesDesdeIndexedDB() {
     });
 }
 
-export function obtenerAficionesUsuarioDesdeIndexedDB() {
+export function obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario) {
     return new Promise((resolve, reject) => {
-        const dbRequest = indexedDB.open("miBaseDeDatos", 1);
+        const request = indexedDB.open("VitoMaite09", 1);
 
-        dbRequest.onerror = () => reject("No se pudo abrir la base de datos.");
-        dbRequest.onsuccess = (event) => {
+        request.onsuccess = function (event) {
             const db = event.target.result;
-            const transaction = db.transaction(["aficiones"], "readonly");
-            const store = transaction.objectStore("aficiones");
 
-            const getAllRequest = store.getAll();
-            getAllRequest.onsuccess = () => resolve(getAllRequest.result);
-            getAllRequest.onerror = () => reject("Error al obtener las aficiones.");
+            const transaction = db.transaction(["usuario_aficion", "aficiones"], "readonly");
+            const usuarioAficionStore = transaction.objectStore("usuario_aficion");
+            const aficionesStore = transaction.objectStore("aficiones");
+
+            // Obtener las aficiones del usuario por su email
+            const userAficionesRequest = usuarioAficionStore.getAll();
+            userAficionesRequest.onsuccess = function () {
+                const userAficiones = userAficionesRequest.result.filter(
+                    (item) => item.email === emailUsuario
+                );
+
+                if (userAficiones.length > 0) {
+                    // Obtener los ID de las aficiones
+                    const aficionIds = userAficiones[0].idAficion;
+
+                    // Obtener todas las aficiones usando los IDs
+                    const aficionesRequest = aficionesStore.getAll();
+                    aficionesRequest.onsuccess = function () {
+                        // Filtrar las aficiones para solo obtener aquellas cuyo ID esté en el array aficionIds
+                        const aficiones = aficionesRequest.result.filter((aficion) =>
+                            aficionIds.includes(aficion.idAficion)
+                        );
+                        
+                        // Ahora necesitamos asegurarnos de que las aficiones tienen un nombre o valor legible
+                        const aficionesConNombre = aficiones.map((aficion) => ({
+                            idAficion: aficion.idAficion,
+                            nombre: aficion.nombreAficion || "Afición sin nombre" // Asegúrate de que tiene un nombre
+                        }));
+                        
+                        resolve(aficionesConNombre); // Devolvemos las aficiones con nombres
+                    };
+
+                    aficionesRequest.onerror = function (event) {
+                        reject("Error al obtener las aficiones: " + event.target.error);
+                    };
+                } else {
+                    resolve([]); // No hay aficiones asociadas al usuario
+                }
+            };
+
+            userAficionesRequest.onerror = function (event) {
+                reject("Error al obtener las aficiones del usuario: " + event.target.error);
+            };
+        };
+
+        request.onerror = function (event) {
+            reject("Error al abrir IndexedDB: " + event.target.error);
         };
     });
 }
+
+
+
+

@@ -414,47 +414,76 @@ export function cargarFotoYMensajeBienvenida(obtenerUsuariosDesdeIndexedDB) {
 }
 
 export function cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, content) {
-    // Obtener las aficiones desde IndexedDB
-    obtenerAficionesUsuarioDesdeIndexedDB()
-        .then(aficiones => {
-            // Crear el contenedor para mostrar las aficiones
-            const aficionesContainer = document.createElement("div");
-            aficionesContainer.classList.add("row", "g-3");
+    const loggedInUser = JSON.parse(sessionStorage.getItem("userLoggedIn"));
+    const emailUsuario = loggedInUser?.email;
 
-            aficiones.forEach(aficion => {
-                // Crear un contenedor para cada afición (con tarjeta)
-                const aficionContainer = document.createElement("div");
-                aficionContainer.classList.add("aficion-item", "col-md-3");  // Cuatro ítems por fila en pantallas medianas
+    if (!emailUsuario) {
+        content.innerHTML = "<p>Error: No se encontró el usuario logueado.</p>";
+        return;
+    }
 
-                // Crear el input (checkbox)
-                const checkbox = document.createElement("input");
-                checkbox.type = "checkbox";
-                checkbox.name = "aficiones";
-                checkbox.value = aficion;
-                checkbox.id = `aficion-${aficion.toLowerCase()}`;
-                checkbox.classList.add("form-check-input", "me-2");
+    const selectElement = document.getElementById("aficionesSelect");
+    const detailsElement = document.getElementById("aficionDetails");
 
-                // Crear la etiqueta para el checkbox
-                const label = document.createElement("label");
-                label.htmlFor = checkbox.id;
-                label.textContent = aficion;
-                label.classList.add("form-check-label");
+    // Verificar que los elementos existen
+    if (!selectElement || !detailsElement) {
+        console.error("Los elementos selectElement o detailsElement no están disponibles en el DOM.");
+        return;
+    }
+    
+    // Limpiar el contenido existente
+    selectElement.innerHTML = `<option value="" disabled selected>Ver aficiones</option>`;
+    detailsElement.innerHTML = "";
 
-                // Añadir el checkbox y la etiqueta al contenedor de la afición
-                aficionContainer.appendChild(checkbox);
-                aficionContainer.appendChild(label);
+    // Cargar aficiones del usuario
+    obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario)
+        .then((aficiones) => {
+            if (aficiones.length === 0) {
+                // Si no hay aficiones, ocultamos el desplegable y mostramos un mensaje
+                selectElement.style.display = "none"; // Ocultamos el desplegable
+                detailsElement.innerHTML = "<p>No tienes aficiones registradas.</p>";
+                return;
+            }
 
-                // Añadir el contenedor al contenedor principal de aficiones
-                aficionesContainer.appendChild(aficionContainer);
+            // Si hay aficiones, mostramos el desplegable
+            selectElement.style.display = "block"; // Aseguramos que el desplegable esté visible
+
+            // Comprobamos si cada afición tiene un nombre
+            aficiones.forEach((aficion) => {
+                if (!aficion.nombre) {
+                    console.warn(`Afición con ID ${aficion.idAficion} no tiene nombre.`);
+                }
             });
 
-            // Limpiar el contenido anterior de "main" y añadir el nuevo contenido
-            content.innerHTML = '';  // Limpiar el contenido previo de la página
-            content.appendChild(aficionesContainer);  // Insertar las aficiones al contenido
+            // Crear opciones para el select
+            aficiones.forEach((aficion) => {
+                // Si no tiene nombre, mostramos un valor predeterminado
+                const nombreAficion = aficion.nombre || "Nombre no disponible";
+                const option = document.createElement("option");
+                option.value = aficion.idAficion;
+                option.textContent = nombreAficion; // Asegúrate de que 'nombre' es el campo correcto
+                option.disabled = true; // Deshabilitamos la opción para que no se pueda seleccionar
+                selectElement.appendChild(option);
+            });
 
+            // Manejar el cambio de selección
+            selectElement.addEventListener("change", () => {
+                const selectedId = selectElement.value;
+                const selectedAficion = aficiones.find(
+                    (aficion) => aficion.idAficion === selectedId
+                );
+
+                if (selectedAficion) {
+                    detailsElement.innerHTML = `
+                        <h3>${selectedAficion.nombre}</h3>
+                        <p>ID: ${selectedAficion.idAficion}</p>
+                    `;
+                }
+            });
         })
-        .catch(error => {
-            console.error("Error al cargar las aficiones:", error);
-            content.innerHTML = `<p>Error al cargar las aficiones.</p>`;  // Mensaje de error
+        .catch((error) => {
+            console.error("Error al cargar aficiones:", error);
+            detailsElement.innerHTML = `<p>Error al cargar aficiones: ${error}</p>`;
         });
 }
+
