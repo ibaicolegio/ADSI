@@ -99,7 +99,7 @@ export function cargarLikes(obtenerLikesDesdeIndexedDB, obtenerUsuariosDesdeInde
                                 sessionStorage.getItem("selectedUserEmail", userEmail);
 
                                 // Si está autenticado, cargar el perfil
-                                fetch("./views/verPerfil.html")
+                                fetch("./html/verPerfil.html")
                                         .then((response) => {
                                             if (!response.ok)
                                                 throw new Error("Página no encontrada.");
@@ -145,7 +145,7 @@ export function cargarLikes(obtenerLikesDesdeIndexedDB, obtenerUsuariosDesdeInde
 
 // Configurar el formulario de inicio de sesión
 export function login(obtenerUsuariosDesdeIndexedDB) {
-    const loginForm = document.getElementById("loginForm"); // Asegúrate de que exista en `views/login.html`
+    const loginForm = document.getElementById("loginForm"); // Asegúrate de que exista en `html/login.html`
 
     if (loginForm) {
         // Manejar el envío del formulario de login
@@ -183,44 +183,74 @@ export function login(obtenerUsuariosDesdeIndexedDB) {
 export function loadUserProfile(obtenerUsuariosDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, emailUsuario) {
     // Primero, obtenemos los usuarios desde IndexedDB
     obtenerUsuariosDesdeIndexedDB()
-            .then((usuarios) => {
-                // Buscar al usuario con el email especificado
-                const user = usuarios.find(u => u.email === emailUsuario);
-                console.log(user);
-                if (user) {
-                    // Rellenar los datos del perfil
-                    document.getElementById("userName").textContent = `Nombre: ${user.nombre}`;
-                    document.getElementById("userAge").textContent = `Edad: ${user.edad}`;
-                    document.getElementById("userCity").textContent = `Ciudad: ${user.ciudad}`;
+        .then((usuarios) => {
+            // Buscar al usuario con el email especificado
+            const user = usuarios.find(u => u.email === emailUsuario);
+            console.log(user);
+            if (user) {
+                // Rellenar los datos del perfil
+                document.getElementById("userName").textContent = `Nombre: ${user.nombre}`;
+                document.getElementById("userAge").textContent = `Edad: ${user.edad}`;
+                document.getElementById("userCity").textContent = `Ciudad: ${user.ciudad}`;
 
-                    // Si la foto está en Base64, la asignamos al atributo src del img
-                    if (user.foto) {
-                        document.getElementById("userImage").src = `data:image/jpeg;base64,${user.foto}`;
-                    } else {
-                        // Si no hay foto, se asigna una imagen por defecto
-                        document.getElementById("userImage").src = "https://via.placeholder.com/100";
-                    }
-
-                    // Obtener las aficiones del usuario
-                    return obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario);
+                // Si la foto está en Base64, la asignamos al atributo src del img
+                if (user.foto) {
+                    document.getElementById("userImage").src = `data:image/jpeg;base64,${user.foto}`;
                 } else {
-                    throw new Error("Usuario no encontrado.");
+                    // Si no hay foto, se asigna una imagen por defecto
+                    document.getElementById("userImage").src = "https://via.placeholder.com/100";
                 }
-            })
-            .then((aficiones) => {
-                // Rellenar las aficiones
-                const hobbiesList = document.getElementById("userHobbies");
-                hobbiesList.innerHTML = ""; // Limpiar la lista de aficiones antes de llenarla
-                aficiones.forEach((aficion) => {
-                    const li = document.createElement("li");
-                    li.textContent = aficion.nombre;
-                    hobbiesList.appendChild(li);
-                });
-            })
-            .catch((error) => {
-                console.error("Error al cargar el perfil:", error);
-                alert("Error al cargar el perfil.");
+
+                // Mostrar el mapa con la ubicación del usuario
+                if (user.lat && user.lng) {
+                    showUserLocationOnMap(user.lat, user.lng);
+                } else {
+                    console.warn("El usuario no tiene coordenadas disponibles.");
+                }
+
+                // Obtener las aficiones del usuario
+                return obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario);
+            } else {
+                throw new Error("Usuario no encontrado.");
+            }
+        })
+        .then((aficiones) => {
+            // Rellenar las aficiones
+            const hobbiesList = document.getElementById("userHobbies");
+            hobbiesList.innerHTML = ""; // Limpiar la lista de aficiones antes de llenarla
+            aficiones.forEach((aficion) => {
+                const li = document.createElement("li");
+                li.textContent = aficion.nombre;
+                hobbiesList.appendChild(li);
             });
+        })
+        .catch((error) => {
+            console.error("Error al cargar el perfil:", error);
+            alert("Error al cargar el perfil.");
+        });
+}
+
+// Función para mostrar el mapa con la ubicación del usuario
+function showUserLocationOnMap(lat, lng) {
+    const mapContainer = document.getElementById("userMap");
+
+    if (!mapContainer) {
+        console.error("No se encontró el contenedor del mapa.");
+        return;
+    }
+
+    // Crear un mapa centrado en las coordenadas del usuario
+    const map = new google.maps.Map(mapContainer, {
+        center: { lat, lng },
+        zoom: 14,
+    });
+
+    // Añadir un marcador en la ubicación del usuario
+    new google.maps.Marker({
+        position: { lat, lng },
+        map: map,
+        title: "Ubicación del usuario",
+    });
 }
 
 export async function buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, content, view) {
@@ -387,7 +417,7 @@ export async function buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesd
                                     // Verificar si el usuario está autenticado
                                     const isAuthenticated = sessionStorage.getItem("userLoggedIn");
                                     if (!isAuthenticated) {
-                                        fetch("./views/login.html")
+                                        fetch("./html/login.html")
                                                 .then((response) => {
                                                     if (!response.ok)
                                                         throw new Error("Página no encontrada.");
@@ -404,7 +434,7 @@ export async function buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesd
                                         const isAuthenticated = sessionStorage.getItem("userLoggedIn");
                                         const isSelectedUserEmail = sessionStorage.getItem("selectedUserEmail");
                                         if (isAuthenticated && isSelectedUserEmail) {
-                                            fetch("./views/verPerfil.html")
+                                            fetch("./html/verPerfil.html")
                                                     .then((response) => {
                                                         if (!response.ok)
                                                             throw new Error("Página no encontrada.");
@@ -603,7 +633,7 @@ export function añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesU
                                 .then((mensaje) => {
                                     alert(mensaje);  // Mostrar el mensaje de éxito
                                     const content = document.getElementById("main");
-                                    fetch("./views/añadirAficion.html")
+                                    fetch("./html/añadirAficion.html")
                                             .then((response) => {
                                                 if (!response.ok)
                                                     throw new Error("Página no encontrada.");
@@ -876,7 +906,6 @@ function actualizarMarcadores(map, circle, obtenerUsuariosDesdeIndexedDB) {
                         content: `
                             <p><strong>${usuario.nombre}</strong></p>
                             <p>Edad: ${usuario.edad}</p>
-                            <p>Ciudad: ${usuario.ciudad}</p>
                         `
                     });
 

@@ -25,9 +25,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 // Función para cargar la página de login con su propio header
 function loadPaginaPrincipal() {
     Promise.all([
-        loadHTML("views/login-header.html", "header"),
-        loadHTML("views/inicio.html", "main"),
-        loadHTML("views/footer.html", "footer")
+        loadHTML("html/login-header.html", "header"),
+        loadHTML("html/inicio.html", "main"),
+        loadHTML("html/footer.html", "footer")
     ]).then(() => {
         // Este bloque solo se ejecuta después de que todo se ha cargado
         const loginLinks = document.querySelectorAll("header .nav-link");
@@ -50,7 +50,7 @@ function loadPaginaPrincipal() {
                 if (view) {
                     if (cache[view]) {
                         content.innerHTML = cache[view];
-                        if (view === "views/busqueda.html") {
+                        if (view === "html/busqueda.html") {
                             console.log(view);
                             buscar(obtenerUsuariosDesdeIndexedDB,obtenerAficionesDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB, content);
                         }
@@ -64,11 +64,11 @@ function loadPaginaPrincipal() {
                                 .then((html) => {
                                     cache[view] = html;
                                     content.innerHTML = html;
-                                    if (view === "views/login.html") {
+                                    if (view === "html/login.html") {
                                         console.log(view);
                                         login(obtenerUsuariosDesdeIndexedDB);
                                     }
-                                    if (view === "views/busqueda.html") {
+                                    if (view === "html/busqueda.html") {
                                         console.log(view);
                                         buscar(obtenerUsuariosDesdeIndexedDB,obtenerAficionesDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB, content, view);
                                     }
@@ -85,16 +85,16 @@ function loadPaginaPrincipal() {
 // Función para cargar la página principal con el header general
 function loadPaginaUsuario() {
     Promise.all([
-        loadHTML("views/header.html", "header"),
-        loadHTML("views/inicio.html", "main"),
-        loadHTML("views/footer.html", "footer")
+        loadHTML("html/header.html", "header"),
+        loadHTML("html/inicio.html", "main"),
+        loadHTML("html/footer.html", "footer")
     ])
             .then(() => {
 
                 const isAuthenticated = sessionStorage.getItem("userLoggedIn");
                 const isSelectedUserEmail = sessionStorage.getItem("selectedUserEmail");
                 if (isAuthenticated && isSelectedUserEmail) {
-                    fetch("./views/verPerfil.html")
+                    fetch("./html/verPerfil.html")
                             .then((response) => {
                                 if (!response.ok)
                                     throw new Error("Página no encontrada.");
@@ -140,27 +140,27 @@ function loadPaginaUsuario() {
                         if (view) {
                             if (cache[view]) {
                                 content.innerHTML = cache[view];
-                                if (view === "views/verLikes.html") {
+                                if (view === "html/verLikes.html") {
                                     console.log(view);
                                     cargarLikes(obtenerLikesDesdeIndexedDB,obtenerUsuariosDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB);
                                 }
-                                if (view === "views/busqueda.html") {
+                                if (view === "html/busqueda.html") {
                                     console.log(view);
                                     buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB, content);
                                 }
-                                if (view === "views/verAficion.html") {
+                                if (view === "html/verAficion.html") {
                                                 console.log(view);
                                                 cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, content);
                                 }
-                                if (view === "views/añadirAficion.html") {
+                                if (view === "html/añadirAficion.html") {
                                                 console.log(view);
                                                 añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB,añadirAficionesSeleccionadas, openIndexedDB);
                                 }
-                                if (view === "views/eliminarAficion.html") {
+                                if (view === "html/eliminarAficion.html") {
                                                 console.log(view);
                                                 eliminarAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, openIndexedDB);
                                 }
-                                if (view === "views/geolocalizacion.html") {
+                                if (view === "html/geolocalizacion.html") {
                                                 console.log(view);
                                                 initMap(openIndexedDB, obtenerUsuariosDesdeIndexedDB);
                                             }
@@ -176,27 +176,27 @@ function loadPaginaUsuario() {
                                         .then((html) => {
                                             cache[view] = html;
                                             content.innerHTML = html;
-                                            if (view === "views/verLikes.html") {
+                                            if (view === "html/verLikes.html") {
                                                 console.log(view);
                                                 cargarLikes(obtenerLikesDesdeIndexedDB,obtenerUsuariosDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB);
                                             }
-                                            if (view === "views/busqueda.html") {
+                                            if (view === "html/busqueda.html") {
                                                 console.log(view);
                                                 buscar(obtenerUsuariosDesdeIndexedDB,obtenerAficionesDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB, content);
                                             }
-                                            if (view === "views/verAficion.html") {
+                                            if (view === "html/verAficion.html") {
                                                 console.log(view);
                                                 cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, content);
                                             }
-                                           if (view === "views/añadirAficion.html") {
+                                           if (view === "html/añadirAficion.html") {
                                                 console.log(view);
                                                 añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB,añadirAficionesSeleccionadas, openIndexedDB);
                                             }
-                                            if (view === "views/eliminarAficion.html") {
+                                            if (view === "html/eliminarAficion.html") {
                                                 console.log(view);
                                                 eliminarAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, openIndexedDB);
                                             }
-                                            if (view === "views/geolocalizacion.html") {
+                                            if (view === "html/geolocalizacion.html") {
                                                 console.log(view);
                                                 initMap(openIndexedDB, obtenerUsuariosDesdeIndexedDB);
                                             }
@@ -227,7 +227,7 @@ function loadHTML(file, elementId) {
             .then((html) => {
                 document.getElementById(elementId).innerHTML = html;
                 // Ejecutar una función específica si el archivo cargado es hola.html
-                if (file === "views/login.html") {
+                if (file === "html/login.html") {
                     console.log("hola");
                     setupLoginHandlers(); // Llamar a la función específica
                 }
