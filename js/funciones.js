@@ -1,124 +1,145 @@
-export function cargarLikes(obtenerLikesDesdeIndexedDB) {
+export function cargarLikes(obtenerLikesDesdeIndexedDB,obtenerUsuariosDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB) {
     // Obtener el email del usuario actualmente logueado desde sessionStorage
     const loggedInUser = JSON.parse(sessionStorage.getItem('userLoggedIn')) || {}; // Asegúrate de que este valor esté almacenado en sessionStorage
 
-    // Obtener el contenedor donde se mostrarán los likes
+    // Obtener los contenedores donde se mostrarán los likes y los matches
     const likesContainer = document.getElementById('likesContainer');
-
+    const matchContainer = document.getElementById('matchContainer');
+    
     // Obtener los "me gusta" desde IndexedDB
     obtenerLikesDesdeIndexedDB()
-            .then(likes => {
-                // Verificar si existen "me gusta"
-                if (likes.length > 0) {
-                    // Limpiar el contenedor en caso de que haya contenido previo
-                    likesContainer.innerHTML = '';
+        .then(likes => {
+            // Verificar si existen "me gusta"
+            if (likes.length > 0) {
+                // Limpiar el contenedor en caso de que haya contenido previo
+                likesContainer.innerHTML = '';
 
-                    // Filtrar los "me gusta" donde el email2 coincida con el usuario logueado o donde el usuario esté en email1
-                    const filteredLikes = likes.filter(like => like.email2 === loggedInUser.email || like.email1 === loggedInUser.email);
+                // Filtrar los "me gusta" donde el email2 coincida con el usuario logueado o donde el usuario esté en email1
+                const filteredLikes = likes.filter(like => like.email2 === loggedInUser.email || like.email1 === loggedInUser.email);
 
-                    // Verificar si hay "me gusta" filtrados
-                    if (filteredLikes.length > 0) {
-                        // Recorrer los "me gusta" filtrados y mostrarlos en tarjetas
-                        // Inicializar los arrays para los matches y los likes
-                        const matches = [];
-                        const likes = [];
-                        filteredLikes.forEach(like => {
-                            if (like.email1 && like.email2) {
-                                if (
-                                        like.email1 === loggedInUser.email &&
-                                        filteredLikes.some(otherLike => otherLike.email1 === like.email2 && otherLike.email2 === loggedInUser.email)
-                                        ) {
-                                    // Es un match
-                                    matches.push({user1: like.email1, user2: like.email2});
-                                } else if (like.email2 === loggedInUser.email) {
-                                    // Es un like hacia el usuario logueado
-                                    likes.push(like.email1);
-                                }
+                // Verificar si hay "me gusta" filtrados
+                if (filteredLikes.length > 0) {
+                    // Inicializar los arrays para los matches y los likes
+                    const matches = [];
+                    const likes = [];
+
+                    filteredLikes.forEach(like => {
+                        if (like.email1 && like.email2) {
+                            if (
+                                like.email1 === loggedInUser.email &&
+                                filteredLikes.some(otherLike => otherLike.email1 === like.email2 && otherLike.email2 === loggedInUser.email)
+                            ) {
+                                // Es un match
+                                matches.push({ user1: like.email1, user2: like.email2 });
+                            } else if (like.email2 === loggedInUser.email) {
+                                // Es un like hacia el usuario logueado
+                                likes.push(like.email1);
                             }
+                        }
+                    });
+
+                    // Filtrar los likes para excluir usuarios que ya están en matches
+                    const matchEmails = matches.map(match => match.user2); // Emails del otro usuario en los matches
+                    const filteredLikesWithoutMatches = likes.filter(email => !matchEmails.includes(email));
+
+                    // Recorremos los matches primero
+                    matches.forEach(match => {
+                        const matchElement = document.createElement("div");
+                        matchElement.classList.add("col-12", "col-md-6", "mb-4");
+
+                        // Crear mensaje de match con corazón
+                        const matchMessage = `¡Es un match con ${match.user2}! Ambos se gustan. <i class="fa fa-heart" style="color: red;"></i>`;
+
+                        matchElement.innerHTML = `
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">${matchMessage}</h5>
+                                    <p class="card-text">¡Estás en su lista de favoritos! Conecta con ellos y conoce más.</p>
+                                    <a href="#" class="btn btn-primary view-profile-button" data-email="${match.user2}">Ver perfil</a>
+                                </div>
+                            </div>
+                        `;
+
+                        // Añadir el elemento al contenedor de matches
+                        matchContainer.appendChild(matchElement);
+                    });
+
+                    // Recorremos los likes
+                    filteredLikesWithoutMatches.forEach(likeEmail => {
+                        const likeElement = document.createElement("div");
+                        likeElement.classList.add("col-12", "col-md-6", "mb-4");
+
+                        // Crear mensaje de "me gusta"
+                        const likeMessage = `¡A ${likeEmail} le gustas!`;
+
+                        likeElement.innerHTML = `
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">${likeMessage}</h5>
+                                    <p class="card-text">
+                                        ¡Estás en su lista de favoritos! Conecta con ellos y conoce más.
+                                    </p>
+                                    <a href="#" class="btn btn-primary view-profile-button" data-email="${likeEmail}">Ver perfil</a>
+                                </div>
+                            </div>
+                        `;
+
+                        // Añadir el elemento al contenedor de likes
+                        likesContainer.appendChild(likeElement);
+                    });
+
+                    // Agregar evento a los botones "Ver perfil"
+                    const viewProfileButtons = document.querySelectorAll(".view-profile-button");
+                    viewProfileButtons.forEach(button => {
+                        button.addEventListener("click", function (event) {
+                            event.preventDefault();
+                            const userEmail = button.getAttribute("data-email");
+                            const content = document.getElementById("main");
+                            // Guardar el correo en sessionStorage
+                            sessionStorage.getItem("selectedUserEmail", userEmail);
+                            
+                                // Si está autenticado, cargar el perfil
+                                fetch("./views/verPerfil.html")
+                                    .then((response) => {
+                                        if (!response.ok) throw new Error("Página no encontrada.");
+                                        return response.text();
+                                    })
+                                    .then((html) => {
+                                        content.innerHTML = html;
+                                        loadUserProfile(obtenerUsuariosDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, userEmail);
+                                    })
+                                    .catch((error) => {
+                                        content.innerHTML = `<p>Error: ${error.message}</p>`;
+                                    });
+                            
                         });
+                    });
 
-                        // Filtrar los likes para excluir usuarios que ya están en matches
-                        const matchEmails = matches.map(match => match.user2); // Emails del otro usuario en los matches
-                        const filteredLikesWithoutMatches = likes.filter(email => !matchEmails.includes(email)); // Filtrar likes
-                        console.log(likes);
-                        console.log(matches);
-
-                        // Recorremos los matches primero
-                        matches.forEach(match => {
-                            const likeElement = document.createElement("div");
-                            likeElement.classList.add("col-12", "col-md-6", "mb-4");
-
-                            // Crear mensaje de match
-                            const matchMessage = `¡Es un match con ${match.user2}! Ambos se gustan.`;
-
-                            likeElement.innerHTML = `
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">${matchMessage} <i class="fa fa-heart" style="color: red;"></i></h5>
-            <p class="card-text">¡Estás en su lista de favoritos! Conecta con ellos y conoce más.</p>
-            <a href="#" class="btn btn-primary">Ver perfil</a>
-        </div>
-    </div>
-`;
-
-                            // Añadir el elemento al contenedor si tiene mensaje
-                            if (matchMessage !== "") {
-                                console.log(matchMessage);
-                                likesContainer.appendChild(likeElement);
-                            }
-                        });
-
-                        // Recorremos los likes
-                        filteredLikesWithoutMatches.forEach(likeEmail => {
-                            const likeElement = document.createElement("div");
-                            likeElement.classList.add("col-12", "col-md-6", "mb-4");
-
-                            // Crear mensaje de "me gusta"
-                            const likeMessage = `¡A ${likeEmail} le gustas!`;
-
-                            likeElement.innerHTML = `
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">${likeMessage}</h5>
-                <p class="card-text">
-                    ¡Estás en su lista de favoritos! Conecta con ellos y conoce más.
-                </p>
-                <a href="#" class="btn btn-primary">Ver perfil</a>
-            </div>
-        </div>
-    `;
-
-                            // Añadir el elemento al contenedor si tiene mensaje
-                            if (likeMessage !== "") {
-                                console.log(likeMessage);
-                                likesContainer.appendChild(likeElement);
-                            }
-                        });
-                    } else {
-                        // Si no hay "me gusta" filtrados, mostrar un mensaje
-                        likesContainer.innerHTML = `
+                } else {
+                    // Si no hay "me gusta" filtrados, mostrar un mensaje
+                    likesContainer.innerHTML = `
                         <div class="alert alert-warning text-center" role="alert">
                             No tienes "Me Gusta" registrados.
                         </div>
                     `;
-                    }
-                } else {
-                    // Si no hay "me gusta", mostrar un mensaje
-                    likesContainer.innerHTML = `
+                }
+            } else {
+                // Si no hay "me gusta", mostrar un mensaje
+                likesContainer.innerHTML = `
                     <div class="alert alert-info text-center" role="alert">
                         No hay "Me Gusta" registrados.
                     </div>
                 `;
-                }
-            })
-            .catch(error => {
-                console.error("Error al obtener los 'me gusta' desde IndexedDB:", error);
-                likesContainer.innerHTML = `
+            }
+        })
+        .catch(error => {
+            console.error("Error al obtener los 'me gusta' desde IndexedDB:", error);
+            likesContainer.innerHTML = `
                 <div class="alert alert-danger text-center" role="alert">
                     Hubo un problema al acceder a la base de datos.
                 </div>
             `;
-            });
+        });
 }
 
 // Configurar el formulario de inicio de sesión

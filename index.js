@@ -142,7 +142,7 @@ function loadPaginaUsuario() {
                                 content.innerHTML = cache[view];
                                 if (view === "views/verLikes.html") {
                                     console.log(view);
-                                    cargarLikes(obtenerLikesDesdeIndexedDB);
+                                    cargarLikes(obtenerLikesDesdeIndexedDB,obtenerUsuariosDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB);
                                 }
                                 if (view === "views/busqueda.html") {
                                     console.log(view);
@@ -174,7 +174,7 @@ function loadPaginaUsuario() {
                                             content.innerHTML = html;
                                             if (view === "views/verLikes.html") {
                                                 console.log(view);
-                                                cargarLikes(obtenerLikesDesdeIndexedDB);
+                                                cargarLikes(obtenerLikesDesdeIndexedDB,obtenerUsuariosDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB);
                                             }
                                             if (view === "views/busqueda.html") {
                                                 console.log(view);
