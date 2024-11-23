@@ -113,27 +113,34 @@ export function obtenerUsuariosDesdeIndexedDB() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open("VitoMaite09", 1);
 
-        request.onsuccess = function (event) {
+        request.onsuccess = function(event) {
             const db = event.target.result;
             const transaction = db.transaction("usuarios", "readonly");
             const objectStore = transaction.objectStore("usuarios");
             const allUsersRequest = objectStore.getAll(); // Obtener todos los usuarios
 
-            allUsersRequest.onsuccess = function () {
+            allUsersRequest.onsuccess = function() {
                 const usuarios = allUsersRequest.result;
 
-                // Ordenar los usuarios por el campo 'edad'
-                usuarios.sort((a, b) => a.edad - b.edad);
+                // Mapear `latitud` y `longitud` a `lat` y `lng` para compatibilidad con el mapa
+                const usuariosConCoordenadas = usuarios.map((usuario) => ({
+                    ...usuario,
+                    lat: usuario.latitud, // Convertir latitud a lat
+                    lng: usuario.longitud // Convertir longitud a lng
+                }));
 
-                resolve(usuarios); // Resolver con la lista ordenada
+                // Ordenar los usuarios por el campo 'edad'
+                usuariosConCoordenadas.sort((a, b) => a.edad - b.edad);
+
+                resolve(usuariosConCoordenadas); // Resolver con la lista ordenada
             };
 
-            allUsersRequest.onerror = function (event) {
+            allUsersRequest.onerror = function(event) {
                 reject("Error al obtener los usuarios: " + event.target.error);
             };
         };
 
-        request.onerror = function (event) {
+        request.onerror = function(event) {
             reject("Error al abrir la base de datos IndexedDB: " + event.target.error);
         };
     });

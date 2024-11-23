@@ -1,4 +1,4 @@
-import {cargarLikes,loadUserProfile, login, buscar, cargarFotoYMensajeBienvenida, cargarAficiones, añadirAficion, eliminarAficion} from "./js/funciones.js";
+import {cargarLikes,loadUserProfile, login, buscar, cargarFotoYMensajeBienvenida, cargarAficiones, añadirAficion, eliminarAficion, initMap} from "./js/funciones.js";
 import {openIndexedDB,añadirAficionesSeleccionadas, cargarYAlmacenarDatos, obtenerUsuariosDesdeIndexedDB, obtenerLikesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, obtenerAficionesDesdeIndexedDB} from "./js/bd.js";
 // Objeto para almacenar las páginas cargadas
 const cache = {};
@@ -191,6 +191,10 @@ function loadPaginaUsuario() {
                                             if (view === "views/eliminarAficion.html") {
                                                 console.log(view);
                                                 eliminarAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, openIndexedDB);
+                                            }
+                                            if (view === "views/geolocalizacion.html") {
+                                                console.log(view);
+                                                initMap(openIndexedDB, obtenerUsuariosDesdeIndexedDB);
                                             }
                                             
                                         })

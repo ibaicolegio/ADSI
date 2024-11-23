@@ -1,27 +1,8 @@
-<!DOCTYPE html>
-<html>
-    <head> 
-        <meta charset="UTF-8">
-        <meta name="viewport" content="initial-scale=1.0">
-        <title>Maps JavaScript API</title>
-        <link rel="stylesheet" href="css/styles.css">
-        <script>
-            var map;
-            function initMap() {
-                map = new google.maps.Map(document.getElementById('map'), {
-                    center: {lat: 42.839015, lng: -2.674692},  <!-- Corregido aquí -->
-                    zoom: 13,
-                });
-                var marker = new google.maps.Marker({
-                    position: {lat: 42.839015, lng: -2.674692},
-                    map: map,
-                    title: 'Escuela de Ingeniería de Vitoria'
-                });
-            }
-        </script>
-    </head>  
-    <body>
-        <div id="map"></div>
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAg1Ef_2UJmZgyZk4WSKssPVlE4IZOFCtY&callback=initMap" async defer></script>
-    </body> 
-</html>
+<div id="mapGeolocalizacion">
+    <h2>Geolocalización</h2>
+    <p>Mueve el mapa para centrar el círculo en tu ubicación deseada y ajusta el radio con el control deslizante.</p>
+    <div id="mapContainer" style="height: 400px; width: 100%;"></div>
+    <label for="range">Radio del círculo:</label>
+    <input type="range" id="range" min="0.5" max="2" step="0.5" value="1">
+    <span id="rangeValue">1 km</span>
+</div>

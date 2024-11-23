@@ -777,3 +777,118 @@ export function eliminarAficion(obtenerAficionesUsuarioDesdeIndexedDB, openIndex
                 console.error("Error al cargar las aficiones del usuario:", error);
             });
 }
+
+export function initMap(openIndexedDB, obtenerUsuariosDesdeIndexedDB) {
+    const mapContainer = document.getElementById("mapContainer");
+
+    if (!navigator.geolocation) {
+        mapContainer.innerHTML = `<p>Geolocalización no soportada por tu navegador.</p>`;
+        console.error("Geolocalización no soportada por este navegador.");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const userLocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+            };
+
+            // Crear el mapa centrado en la ubicación del usuario
+            const map = new google.maps.Map(mapContainer, {
+                center: userLocation,
+                zoom: 14,
+            });
+
+            // Crear un círculo inicial
+            const circle = new google.maps.Circle({
+                map: map,
+                center: userLocation,
+                radius: 1000, // Radio inicial: 1 km
+                fillColor: "#FF0000",
+                fillOpacity: 0.35,
+                strokeColor: "#FF0000",
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                draggable: false, // Asegurarse de que el círculo no se pueda mover
+            });
+
+            // No mover el círculo ni cambiar su radio
+            map.addListener("center_changed", () => {
+                // No actualizar el centro del círculo
+                // circle.setCenter(map.getCenter());  // Eliminar esta línea para evitar que el círculo se mueva
+            });
+
+            // No permitir que el radio se cambie desde el control deslizante
+            const rangeInput = document.getElementById("range");
+            const rangeValue = document.getElementById("rangeValue");
+
+            // Deshabilitar el control deslizante de radio
+            rangeInput.disabled = true;
+            rangeValue.textContent = `${circle.getRadius() / 1000} km`; // Mostrar el valor fijo del radio
+
+            // Cargar la base de datos IndexedDB
+            openIndexedDB()
+                .then(() => {
+                    // Cargar y actualizar los marcadores iniciales
+                    actualizarMarcadores(map, circle, obtenerUsuariosDesdeIndexedDB);
+                })
+                .catch((error) => {
+                    console.error("Error al abrir la base de datos:", error);
+                });
+        },
+        (error) => {
+            console.error("Error obteniendo la ubicación:", error.message);
+            mapContainer.innerHTML = `<p>No se pudo obtener la ubicación. Verifica los permisos de ubicación en tu navegador.</p>`;
+        }
+    );
+}
+
+function actualizarMarcadores(map, circle, obtenerUsuariosDesdeIndexedDB) {
+    obtenerUsuariosDesdeIndexedDB()
+        .then((usuarios) => {
+            // Limpiar marcadores existentes
+            if (map.markers) {
+                map.markers.forEach(marker => marker.setMap(null));
+            }
+            map.markers = [];
+
+            const circleCenter = circle.getCenter();
+            const circleRadius = circle.getRadius();
+
+            usuarios.forEach((usuario) => {
+                const usuarioUbicacion = new google.maps.LatLng(usuario.lat, usuario.lng);
+
+                // Comprobar si el usuario está dentro del círculo
+                if (google.maps.geometry.spherical.computeDistanceBetween(circleCenter, usuarioUbicacion) <= circleRadius) {
+                    // Crear un marcador para el usuario
+                    const marker = new google.maps.Marker({
+                        position: usuarioUbicacion,
+                        map: map,
+                        title: usuario.nombre
+                    });
+
+                    // Crear una ventana de información para mostrar más detalles
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: `
+                            <p><strong>${usuario.nombre}</strong></p>
+                            <p>Edad: ${usuario.edad}</p>
+                            <p>Ciudad: ${usuario.ciudad}</p>
+                        `
+                    });
+
+                    // Mostrar la información al hacer clic en el marcador
+                    marker.addListener("click", () => {
+                        infoWindow.open(map, marker);
+                    });
+
+                    // Agregar el marcador a la lista
+                    map.markers.push(marker);
+                }
+            });
+        })
+        .catch((error) => {
+            console.error("Error obteniendo usuarios desde IndexedDB:", error);
+        });
+}
+
