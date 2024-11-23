@@ -109,7 +109,6 @@ export function cargarYAlmacenarDatos() {
     });
 }
 
-// Función para obtener los usuarios desde IndexedDB
 export function obtenerUsuariosDesdeIndexedDB() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open("VitoMaite09", 1);
@@ -121,7 +120,12 @@ export function obtenerUsuariosDesdeIndexedDB() {
             const allUsersRequest = objectStore.getAll(); // Obtener todos los usuarios
 
             allUsersRequest.onsuccess = function() {
-                resolve(allUsersRequest.result); // Resolver con todos los usuarios
+                const usuarios = allUsersRequest.result;
+
+                // Ordenar los usuarios por el campo 'edad'
+                usuarios.sort((a, b) => a.edad - b.edad);
+
+                resolve(usuarios); // Resolver con la lista ordenada
             };
 
             allUsersRequest.onerror = function(event) {

@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (!isAuthenticated) {
         // Mostrar el login con su propio header
         loadPaginaPrincipal();
-        buscar(obtenerUsuariosDesdeIndexedDB);
+        buscar(obtenerUsuariosDesdeIndexedDB,obtenerAficionesDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB);
     } else {
         // Mostrar el contenido principal con el header general
         loadPaginaUsuario();
@@ -52,7 +52,7 @@ function loadPaginaPrincipal() {
                         content.innerHTML = cache[view];
                         if (view === "views/busqueda.html") {
                             console.log(view);
-                            buscar(obtenerUsuariosDesdeIndexedDB, content);
+                            buscar(obtenerUsuariosDesdeIndexedDB,obtenerAficionesDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB, content);
                         }
                     } else {
                         fetch(view)
@@ -70,7 +70,7 @@ function loadPaginaPrincipal() {
                                     }
                                     if (view === "views/busqueda.html") {
                                         console.log(view);
-                                        buscar(obtenerUsuariosDesdeIndexedDB, content, view);
+                                        buscar(obtenerUsuariosDesdeIndexedDB,obtenerAficionesDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB, content, view);
                                     }
                                 })
                                 .catch((error) => {
@@ -145,7 +145,7 @@ function loadPaginaUsuario() {
                                 }
                                 if (view === "views/busqueda.html") {
                                     console.log(view);
-                                    buscar(obtenerUsuariosDesdeIndexedDB, content);
+                                    buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB, content);
                                 }
                                 if (view === "views/verAficion.html") {
                                                 console.log(view);
@@ -177,7 +177,7 @@ function loadPaginaUsuario() {
                                             }
                                             if (view === "views/busqueda.html") {
                                                 console.log(view);
-                                                buscar(obtenerUsuariosDesdeIndexedDB, content);
+                                                buscar(obtenerUsuariosDesdeIndexedDB,obtenerAficionesDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB, content);
                                             }
                                             if (view === "views/verAficion.html") {
                                                 console.log(view);
