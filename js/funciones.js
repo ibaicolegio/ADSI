@@ -813,19 +813,22 @@ export function initMap(openIndexedDB, obtenerUsuariosDesdeIndexedDB) {
                 draggable: false, // Asegurarse de que el círculo no se pueda mover
             });
 
-            // No mover el círculo ni cambiar su radio
+            // No mover el círculo ni cambiar su centro al interactuar con el mapa
             map.addListener("center_changed", () => {
-                // No actualizar el centro del círculo
-                // circle.setCenter(map.getCenter());  // Eliminar esta línea para evitar que el círculo se mueva
+                // No hacer nada aquí
             });
 
-            // No permitir que el radio se cambie desde el control deslizante
+            // Permitir cambiar el radio con el control deslizante
             const rangeInput = document.getElementById("range");
             const rangeValue = document.getElementById("rangeValue");
 
-            // Deshabilitar el control deslizante de radio
-            rangeInput.disabled = true;
-            rangeValue.textContent = `${circle.getRadius() / 1000} km`; // Mostrar el valor fijo del radio
+            rangeInput.addEventListener("input", () => {
+                const radiusInKm = parseFloat(rangeInput.value);
+                circle.setRadius(radiusInKm * 1000); // Convertir km a metros
+                rangeValue.textContent = `${radiusInKm} km`; // Actualizar el valor del radio
+                // Actualizar marcadores después de cambiar el radio
+                actualizarMarcadores(map, circle, obtenerUsuariosDesdeIndexedDB);
+            });
 
             // Cargar la base de datos IndexedDB
             openIndexedDB()

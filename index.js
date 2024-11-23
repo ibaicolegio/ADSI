@@ -160,6 +160,10 @@ function loadPaginaUsuario() {
                                                 console.log(view);
                                                 eliminarAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, openIndexedDB);
                                 }
+                                if (view === "views/geolocalizacion.html") {
+                                                console.log(view);
+                                                initMap(openIndexedDB, obtenerUsuariosDesdeIndexedDB);
+                                            }
                                             
                             
                             } else {
