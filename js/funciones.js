@@ -495,55 +495,39 @@ export function cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, content) 
 
     // Cargar aficiones del usuario
     obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario)
-            .then((aficiones) => {
-                if (aficiones.length === 0) {
-                    // Si no hay aficiones, ocultamos el desplegable y mostramos un mensaje
-                    selectElement.style.display = "none"; // Ocultamos el desplegable
-                    detailsElement.innerHTML = "<p>No tienes aficiones registradas.</p>";
-                    return;
+        .then((aficiones) => {
+            if (aficiones.length === 0) {
+                // Si no hay aficiones, mostramos un mensaje
+                selectElement.style.display = "none"; // Ocultamos el desplegable
+                detailsElement.innerHTML = "<p>No tienes aficiones registradas.</p>";
+                return;
+            }
+
+            // Si hay aficiones, mostramos el desplegable
+            selectElement.style.display = "block"; // Aseguramos que el desplegable esté visible
+
+            // Mostrar las aficiones como badges
+            aficiones.forEach((aficion) => {
+                if (!aficion.nombre) {
+                    console.warn(`Afición con ID ${aficion.idAficion} no tiene nombre.`);
                 }
 
-                // Si hay aficiones, mostramos el desplegable
-                selectElement.style.display = "block"; // Aseguramos que el desplegable esté visible
+                // Crear badge para cada afición
+                const nombreAficion = aficion.nombre || "Nombre no disponible";
+                const badge = document.createElement("span");
+                badge.classList.add("badge", "bg-primary", "rounded-pill", "me-2");
+                badge.textContent = nombreAficion;
 
-                // Comprobamos si cada afición tiene un nombre
-                aficiones.forEach((aficion) => {
-                    if (!aficion.nombre) {
-                        console.warn(`Afición con ID ${aficion.idAficion} no tiene nombre.`);
-                    }
-                });
-
-                // Crear opciones para el select
-                aficiones.forEach((aficion) => {
-                    // Si no tiene nombre, mostramos un valor predeterminado
-                    const nombreAficion = aficion.nombre || "Nombre no disponible";
-                    const option = document.createElement("option");
-                    option.value = aficion.idAficion;
-                    option.textContent = nombreAficion; // Asegúrate de que 'nombre' es el campo correcto
-                    option.disabled = true; // Deshabilitamos la opción para que no se pueda seleccionar
-                    selectElement.appendChild(option);
-                });
-
-                // Manejar el cambio de selección
-                selectElement.addEventListener("change", () => {
-                    const selectedId = selectElement.value;
-                    const selectedAficion = aficiones.find(
-                            (aficion) => aficion.idAficion === selectedId
-                    );
-
-                    if (selectedAficion) {
-                        detailsElement.innerHTML = `
-                        <h3>${selectedAficion.nombre}</h3>
-                        <p>ID: ${selectedAficion.idAficion}</p>
-                    `;
-                    }
-                });
-            })
-            .catch((error) => {
-                console.error("Error al cargar aficiones:", error);
-                detailsElement.innerHTML = `<p>Error al cargar aficiones: ${error}</p>`;
+                // Añadir la afición al contenedor de aficiones
+                detailsElement.appendChild(badge);
             });
+        })
+        .catch((error) => {
+            console.error("Error al cargar aficiones:", error);
+            detailsElement.innerHTML = `<p>Error al cargar aficiones: ${error}</p>`;
+        });
 }
+
 
 export function añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, openIndexedDB) {
     const loggedInUser = JSON.parse(sessionStorage.getItem("userLoggedIn"));

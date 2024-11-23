@@ -1,18 +1,24 @@
 <div class="container mt-5">
-        <h2 class="text-center">Perfil de Usuario</h2>
-        <div id="userProfile" class="user-card mt-4">
-            <!-- Aquí se rellenará el perfil del usuario -->
-            <div class="row">
-                <div class="col-md-4">
-                    <img id="userImage" src="https://via.placeholder.com/100" alt="Imagen de usuario" class="img-fluid rounded-circle">
-                </div>
-                <div class="col-md-8">
-                    <h4 id="userName">Nombre: </h4>
-                    <p id="userAge">Edad: </p>
-                    <p id="userCity">Ciudad: </p>
-                    <p><strong>Aficiones:</strong></p>
-                    <ul id="userHobbies"></ul>
+    <h2 class="text-center text-primary mb-4">Perfil de Usuario</h2>
+
+    <div id="userProfile" class="card shadow-lg p-4 mb-4 border-0">
+        <!-- Imagen de perfil y detalles -->
+        <div class="row align-items-center">
+            <div class="col-md-4 text-center">
+                <img id="userImage" src="https://via.placeholder.com/200" alt="Imagen de usuario" class="img-fluid rounded-circle border border-primary p-2">
+            </div>
+            <div class="col-md-8">
+                <h4 id="userName" class="text-dark mb-2">Nombre: </h4>
+                <p id="userAge" class="text-muted"><strong>Edad:</strong> </p>
+                <p id="userCity" class="text-muted"><strong>Ciudad:</strong> </p>
+                
+                <div>
+                    <strong class="text-dark">Aficiones:</strong>
+                    <div id="userHobbies" class="mt-2">
+                        <!-- Aquí se agregarán las aficiones -->
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
