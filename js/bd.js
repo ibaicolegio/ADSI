@@ -8,16 +8,16 @@ export function openIndexedDB() {
 
             // Crear almacenes para cada tipo de datos
             if (!db.objectStoreNames.contains('usuarios')) {
-                db.createObjectStore('usuarios', { keyPath: 'email' });
+                db.createObjectStore('usuarios', {keyPath: 'email'});
             }
             if (!db.objectStoreNames.contains('meGusta')) {
-                db.createObjectStore('meGusta', { keyPath: ['email1', 'email2'] });  // Usando 'email1' como clave primaria
+                db.createObjectStore('meGusta', {keyPath: ['email1', 'email2']});  // Usando 'email1' como clave primaria
             }
             if (!db.objectStoreNames.contains('aficiones')) {
-                db.createObjectStore('aficiones', { keyPath: 'idAficion' });
+                db.createObjectStore('aficiones', {keyPath: 'idAficion'});
             }
             if (!db.objectStoreNames.contains('usuario_aficion')) {
-                db.createObjectStore('usuario_aficion', { keyPath: ['email', 'idAficion'] });
+                db.createObjectStore('usuario_aficion', {keyPath: ['email', 'idAficion']});
             }
         };
 
@@ -55,16 +55,16 @@ function insertarEnIndexedDB(db, storeName, data) {
 // Función para cargar el archivo JSON
 function cargarJSONDesdeArchivo(url) {
     return fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Error al cargar el archivo JSON: ${url}`);
-            }
-            return response.json();
-        })
-        .catch(error => {
-            console.error('Error al cargar el archivo JSON:', error);
-            throw error;
-        });
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error al cargar el archivo JSON: ${url}`);
+                }
+                return response.json();
+            })
+            .catch(error => {
+                console.error('Error al cargar el archivo JSON:', error);
+                throw error;
+            });
 }
 
 // Función para cargar y almacenar todos los datos en IndexedDB
@@ -84,42 +84,42 @@ export function cargarYAlmacenarDatos() {
         cargarJSONDesdeArchivo(archivosJSON.aficiones),
         cargarJSONDesdeArchivo(archivosJSON.usuario_aficion)
     ])
-    .then(([usuariosData, meGustaData, aficionesData, usuario_aficionData]) => {
-        // Abre la base de datos y almacena los datos
-        openIndexedDB().then((db) => {
-            // Almacenar los datos en sus respectivos almacenes
-            Promise.all([
-                insertarEnIndexedDB(db, 'usuarios', usuariosData),
-                insertarEnIndexedDB(db, 'meGusta', meGustaData),
-                insertarEnIndexedDB(db, 'aficiones', aficionesData),
-                insertarEnIndexedDB(db, 'usuario_aficion', usuario_aficionData)
-            ])
-            .then(() => {
-                console.log("Todos los datos se insertaron correctamente en IndexedDB");
+            .then(([usuariosData, meGustaData, aficionesData, usuario_aficionData]) => {
+                // Abre la base de datos y almacena los datos
+                openIndexedDB().then((db) => {
+                    // Almacenar los datos en sus respectivos almacenes
+                    Promise.all([
+                        insertarEnIndexedDB(db, 'usuarios', usuariosData),
+                        insertarEnIndexedDB(db, 'meGusta', meGustaData),
+                        insertarEnIndexedDB(db, 'aficiones', aficionesData),
+                        insertarEnIndexedDB(db, 'usuario_aficion', usuario_aficionData)
+                    ])
+                            .then(() => {
+                                console.log("Todos los datos se insertaron correctamente en IndexedDB");
+                            })
+                            .catch((error) => {
+                                console.error("Error al insertar los datos en IndexedDB:", error);
+                            });
+                }).catch((error) => {
+                    console.error("Error al abrir la base de datos:", error);
+                });
             })
-            .catch((error) => {
-                console.error("Error al insertar los datos en IndexedDB:", error);
+            .catch(error => {
+                console.error('Error al cargar los archivos JSON:', error);
             });
-        }).catch((error) => {
-            console.error("Error al abrir la base de datos:", error);
-        });
-    })
-    .catch(error => {
-        console.error('Error al cargar los archivos JSON:', error);
-    });
 }
 
 export function obtenerUsuariosDesdeIndexedDB() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open("VitoMaite09", 1);
 
-        request.onsuccess = function(event) {
+        request.onsuccess = function (event) {
             const db = event.target.result;
             const transaction = db.transaction("usuarios", "readonly");
             const objectStore = transaction.objectStore("usuarios");
             const allUsersRequest = objectStore.getAll(); // Obtener todos los usuarios
 
-            allUsersRequest.onsuccess = function() {
+            allUsersRequest.onsuccess = function () {
                 const usuarios = allUsersRequest.result;
 
                 // Ordenar los usuarios por el campo 'edad'
@@ -128,12 +128,12 @@ export function obtenerUsuariosDesdeIndexedDB() {
                 resolve(usuarios); // Resolver con la lista ordenada
             };
 
-            allUsersRequest.onerror = function(event) {
+            allUsersRequest.onerror = function (event) {
                 reject("Error al obtener los usuarios: " + event.target.error);
             };
         };
 
-        request.onerror = function(event) {
+        request.onerror = function (event) {
             reject("Error al abrir la base de datos IndexedDB: " + event.target.error);
         };
     });
@@ -176,56 +176,47 @@ export function obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario) {
             const usuarioAficionStore = transaction.objectStore("usuario_aficion");
             const aficionesStore = transaction.objectStore("aficiones");
 
-            // Obtener las aficiones del usuario por su email
+            // Obtener todas las asociaciones email-afición
             const userAficionesRequest = usuarioAficionStore.getAll();
             userAficionesRequest.onsuccess = function () {
                 const allUserAficiones = userAficionesRequest.result;
-                console.log("Todos los registros en usuario_aficion:", allUserAficiones);
 
-                // Filtrar los registros asociados al usuario
-                const userAficiones = allUserAficiones.filter((item) => {
-                    const emailBD = item.email?.trim().toLowerCase();
-                    const emailFiltrado = emailUsuario?.trim().toLowerCase();
-                    console.log(`Comparando "${emailBD}" con "${emailFiltrado}"`);
-                    return emailBD === emailFiltrado;
-                });
+                // Filtrar por email del usuario
+                const userAficiones = allUserAficiones.filter(
+                        (item) =>
+                    item.email?.trim().toLowerCase() === emailUsuario?.trim().toLowerCase()
+                );
 
-                console.log(`Registros filtrados para ${emailUsuario}:`, userAficiones);
-
-                if (userAficiones.length > 0) {
-                    // Convertir IDs de aficiones a cadenas
-                    const aficionIds = Array.isArray(userAficiones[0].idAficion)
-                        ? userAficiones[0].idAficion.map(String)
-                        : [String(userAficiones[0].idAficion)];
-                    console.log("IDs de aficiones del usuario:", aficionIds);
-
-                    // Obtener todas las aficiones
-                    const aficionesRequest = aficionesStore.getAll();
-                    aficionesRequest.onsuccess = function () {
-                        const allAficiones = aficionesRequest.result;
-                        console.log("Todas las aficiones en el almacén:", allAficiones);
-
-                        // Filtrar las aficiones asociadas al usuario
-                        const aficiones = allAficiones.filter((aficion) =>
-                            aficionIds.includes(String(aficion.idAficion))
-                        );
-                        console.log("Aficiones del usuario con nombres:", aficiones);
-
-                        // Devolver aficiones con nombres
-                        const aficionesConNombre = aficiones.map((aficion) => ({
-                            idAficion: aficion.idAficion,
-                            nombre: aficion.nombreAficion || "Afición sin nombre"
-                        }));
-                        resolve(aficionesConNombre);
-                    };
-
-                    aficionesRequest.onerror = function (event) {
-                        reject("Error al obtener las aficiones: " + event.target.error);
-                    };
-                } else {
+                if (userAficiones.length === 0) {
                     console.log(`No se encontraron aficiones para el usuario ${emailUsuario}`);
-                    resolve([]);
+                    resolve([]); // Devuelve un array vacío si no hay registros
+                    return;
                 }
+
+                const aficionIds = userAficiones.map((item) => String(item.idAficion));
+
+                // Obtener todas las aficiones de la base de datos
+                const aficionesRequest = aficionesStore.getAll();
+                aficionesRequest.onsuccess = function () {
+                    const allAficiones = aficionesRequest.result;
+
+                    // Filtrar las aficiones correspondientes a los IDs
+                    const aficiones = allAficiones.filter((aficion) =>
+                        aficionIds.includes(String(aficion.idAficion))
+                    );
+
+                    // Mapear aficiones con sus nombres
+                    const aficionesConNombre = aficiones.map((aficion) => ({
+                            idAficion: aficion.idAficion,
+                            nombre: aficion.nombreAficion || "Afición sin nombre",
+                        }));
+
+                    resolve(aficionesConNombre);
+                };
+
+                aficionesRequest.onerror = function (event) {
+                    reject("Error al obtener las aficiones: " + event.target.error);
+                };
             };
 
             userAficionesRequest.onerror = function (event) {
@@ -239,29 +230,59 @@ export function obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario) {
     });
 }
 
+
 // Función para obtener todas las aficiones desde IndexedDB
 export function obtenerAficionesDesdeIndexedDB() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open("VitoMaite09", 1);
 
-        request.onsuccess = function(event) {
+        request.onsuccess = function (event) {
             const db = event.target.result;
             const transaction = db.transaction("aficiones", "readonly");
             const store = transaction.objectStore("aficiones");
             const getAllRequest = store.getAll();
 
-            getAllRequest.onsuccess = function() {
+            getAllRequest.onsuccess = function () {
                 resolve(getAllRequest.result);
             };
 
-            getAllRequest.onerror = function(event) {
+            getAllRequest.onerror = function (event) {
                 reject("Error al obtener todas las aficiones: " + event.target.error);
             };
         };
 
-        request.onerror = function(event) {
+        request.onerror = function (event) {
             reject("Error al abrir la base de datos IndexedDB: " + event.target.error);
         };
+    });
+}
+
+export function añadirAficionesSeleccionadas(db, emailUsuario, aficionesSeleccionadas) {
+    // Convertir un array u objeto a string
+    const aficionesSeleccionadasString = JSON.stringify(aficionesSeleccionadas);
+    console.log(aficionesSeleccionadasString);
+    return new Promise((resolve, reject) => {
+        console.log(emailUsuario + "----" + aficionesSeleccionadas);
+        // Verificar si aficionesSeleccionadas es un array válido y contiene elementos
+        if (!Array.isArray(aficionesSeleccionadas) || aficionesSeleccionadas.length === 0) {
+            reject("No se han seleccionado aficiones.");
+            return;
+        }
+
+        // Crear un array de registros con las aficiones seleccionadas
+        const registros = aficionesSeleccionadas.map((idAficion) => ({
+                email: emailUsuario,
+                idAficion: idAficion
+            }));
+
+        // Usar la función insertarEnIndexedDB para insertar los registros en la tienda 'usuario_aficion'
+        insertarEnIndexedDB(db, 'usuario_aficion', registros)
+                .then(() => {
+                    resolve("¡Aficiones añadidas exitosamente!");
+                })
+                .catch((error) => {
+                    reject(`Error al guardar aficiones en IndexedDB: ${error}`);
+                });
     });
 }
 

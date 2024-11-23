@@ -1,26 +1,98 @@
 [
-    {
+  {
     "email": "borja@adsi.com",  
-    "idAficion": ["5", "3" ,"10" ,"8"]  
-    },
-{
-    "email": "danel@adsi.com",
-    "idAficion": ["6","1","14","3"]
-    },
-        {
-    "email": "elena@adsi.com",
-    "idAficion": ["1","3","5","9"]
-    },
-{
-    "email": "manuel@adsi.com",
-    "idAficion": ["2","6","11","15"]
-    },
-        {
-    "email": "luis@adsi.com",
-    "idAficion": ["13","8","2","8"]
-    },
-{
-    "email": "sofia@adsi.com",
-    "idAficion": ["1","4","12","9"]
-    }
+    "idAficion": "5"
+  },
+  {
+    "email": "borja@adsi.com",  
+    "idAficion": "3"
+  },
+  {
+    "email": "borja@adsi.com",  
+    "idAficion": "10"
+  },
+  {
+    "email": "borja@adsi.com",  
+    "idAficion": "8"
+  },
+  {
+    "email": "danel@adsi.com",  
+    "idAficion": "6"
+  },
+  {
+    "email": "danel@adsi.com",  
+    "idAficion": "1"
+  },
+  {
+    "email": "danel@adsi.com",  
+    "idAficion": "14"
+  },
+  {
+    "email": "danel@adsi.com",  
+    "idAficion": "3"
+  },
+  {
+    "email": "elena@adsi.com",  
+    "idAficion": "1"
+  },
+  {
+    "email": "elena@adsi.com",  
+    "idAficion": "3"
+  },
+  {
+    "email": "elena@adsi.com",  
+    "idAficion": "5"
+  },
+  {
+    "email": "elena@adsi.com",  
+    "idAficion": "9"
+  },
+  {
+    "email": "manuel@adsi.com",  
+    "idAficion": "2"
+  },
+  {
+    "email": "manuel@adsi.com",  
+    "idAficion": "6"
+  },
+  {
+    "email": "manuel@adsi.com",  
+    "idAficion": "11"
+  },
+  {
+    "email": "manuel@adsi.com",  
+    "idAficion": "15"
+  },
+  {
+    "email": "luis@adsi.com",  
+    "idAficion": "13"
+  },
+  {
+    "email": "luis@adsi.com",  
+    "idAficion": "8"
+  },
+  {
+    "email": "luis@adsi.com",  
+    "idAficion": "2"
+  },
+  {
+    "email": "luis@adsi.com",  
+    "idAficion": "8"
+  },
+  {
+    "email": "sofia@adsi.com",  
+    "idAficion": "1"
+  },
+  {
+    "email": "sofia@adsi.com",  
+    "idAficion": "4"
+  },
+  {
+    "email": "sofia@adsi.com",  
+    "idAficion": "12"
+  },
+  {
+    "email": "sofia@adsi.com",  
+    "idAficion": "9"
+  }
 ]

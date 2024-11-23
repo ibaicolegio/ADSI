@@ -1,5 +1,5 @@
 import {cargarLikes,loadUserProfile, login, buscar, cargarFotoYMensajeBienvenida, cargarAficiones, añadirAficion, eliminarAficion} from "./js/funciones.js";
-import {openIndexedDB, cargarYAlmacenarDatos, obtenerUsuariosDesdeIndexedDB, obtenerLikesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, obtenerAficionesDesdeIndexedDB} from "./js/bd.js";
+import {openIndexedDB,añadirAficionesSeleccionadas, cargarYAlmacenarDatos, obtenerUsuariosDesdeIndexedDB, obtenerLikesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, obtenerAficionesDesdeIndexedDB} from "./js/bd.js";
 // Objeto para almacenar las páginas cargadas
 const cache = {};
 
@@ -154,7 +154,7 @@ function loadPaginaUsuario() {
                                 }
                                 if (view === "views/añadirAficion.html") {
                                                 console.log(view);
-                                                añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, openIndexedDB);
+                                                añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB,añadirAficionesSeleccionadas, openIndexedDB);
                                 }
                                 if (view === "views/eliminarAficion.html") {
                                                 console.log(view);
@@ -186,7 +186,7 @@ function loadPaginaUsuario() {
                                             }
                                            if (view === "views/añadirAficion.html") {
                                                 console.log(view);
-                                                añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, openIndexedDB);
+                                                añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB,añadirAficionesSeleccionadas, openIndexedDB);
                                             }
                                             if (view === "views/eliminarAficion.html") {
                                                 console.log(view);

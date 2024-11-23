@@ -1,56 +1,56 @@
-export function cargarLikes(obtenerLikesDesdeIndexedDB,obtenerUsuariosDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB) {
+export function cargarLikes(obtenerLikesDesdeIndexedDB, obtenerUsuariosDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB) {
     // Obtener el email del usuario actualmente logueado desde sessionStorage
     const loggedInUser = JSON.parse(sessionStorage.getItem('userLoggedIn')) || {}; // Asegúrate de que este valor esté almacenado en sessionStorage
 
     // Obtener los contenedores donde se mostrarán los likes y los matches
     const likesContainer = document.getElementById('likesContainer');
     const matchContainer = document.getElementById('matchContainer');
-    
+
     // Obtener los "me gusta" desde IndexedDB
     obtenerLikesDesdeIndexedDB()
-        .then(likes => {
-            // Verificar si existen "me gusta"
-            if (likes.length > 0) {
-                // Limpiar el contenedor en caso de que haya contenido previo
-                likesContainer.innerHTML = '';
+            .then(likes => {
+                // Verificar si existen "me gusta"
+                if (likes.length > 0) {
+                    // Limpiar el contenedor en caso de que haya contenido previo
+                    likesContainer.innerHTML = '';
 
-                // Filtrar los "me gusta" donde el email2 coincida con el usuario logueado o donde el usuario esté en email1
-                const filteredLikes = likes.filter(like => like.email2 === loggedInUser.email || like.email1 === loggedInUser.email);
+                    // Filtrar los "me gusta" donde el email2 coincida con el usuario logueado o donde el usuario esté en email1
+                    const filteredLikes = likes.filter(like => like.email2 === loggedInUser.email || like.email1 === loggedInUser.email);
 
-                // Verificar si hay "me gusta" filtrados
-                if (filteredLikes.length > 0) {
-                    // Inicializar los arrays para los matches y los likes
-                    const matches = [];
-                    const likes = [];
+                    // Verificar si hay "me gusta" filtrados
+                    if (filteredLikes.length > 0) {
+                        // Inicializar los arrays para los matches y los likes
+                        const matches = [];
+                        const likes = [];
 
-                    filteredLikes.forEach(like => {
-                        if (like.email1 && like.email2) {
-                            if (
-                                like.email1 === loggedInUser.email &&
-                                filteredLikes.some(otherLike => otherLike.email1 === like.email2 && otherLike.email2 === loggedInUser.email)
-                            ) {
-                                // Es un match
-                                matches.push({ user1: like.email1, user2: like.email2 });
-                            } else if (like.email2 === loggedInUser.email) {
-                                // Es un like hacia el usuario logueado
-                                likes.push(like.email1);
+                        filteredLikes.forEach(like => {
+                            if (like.email1 && like.email2) {
+                                if (
+                                        like.email1 === loggedInUser.email &&
+                                        filteredLikes.some(otherLike => otherLike.email1 === like.email2 && otherLike.email2 === loggedInUser.email)
+                                        ) {
+                                    // Es un match
+                                    matches.push({user1: like.email1, user2: like.email2});
+                                } else if (like.email2 === loggedInUser.email) {
+                                    // Es un like hacia el usuario logueado
+                                    likes.push(like.email1);
+                                }
                             }
-                        }
-                    });
+                        });
 
-                    // Filtrar los likes para excluir usuarios que ya están en matches
-                    const matchEmails = matches.map(match => match.user2); // Emails del otro usuario en los matches
-                    const filteredLikesWithoutMatches = likes.filter(email => !matchEmails.includes(email));
+                        // Filtrar los likes para excluir usuarios que ya están en matches
+                        const matchEmails = matches.map(match => match.user2); // Emails del otro usuario en los matches
+                        const filteredLikesWithoutMatches = likes.filter(email => !matchEmails.includes(email));
 
-                    // Recorremos los matches primero
-                    matches.forEach(match => {
-                        const matchElement = document.createElement("div");
-                        matchElement.classList.add("col-12", "col-md-6", "mb-4");
+                        // Recorremos los matches primero
+                        matches.forEach(match => {
+                            const matchElement = document.createElement("div");
+                            matchElement.classList.add("col-12", "col-md-6", "mb-4");
 
-                        // Crear mensaje de match con corazón
-                        const matchMessage = `¡Es un match con ${match.user2}! Ambos se gustan. <i class="fa fa-heart" style="color: red;"></i>`;
+                            // Crear mensaje de match con corazón
+                            const matchMessage = `¡Es un match con ${match.user2}! Ambos se gustan. <i class="fa fa-heart" style="color: red;"></i>`;
 
-                        matchElement.innerHTML = `
+                            matchElement.innerHTML = `
                             <div class="card">
                                 <div class="card-body">
                                     <h5 class="card-title">${matchMessage}</h5>
@@ -60,19 +60,19 @@ export function cargarLikes(obtenerLikesDesdeIndexedDB,obtenerUsuariosDesdeIndex
                             </div>
                         `;
 
-                        // Añadir el elemento al contenedor de matches
-                        matchContainer.appendChild(matchElement);
-                    });
+                            // Añadir el elemento al contenedor de matches
+                            matchContainer.appendChild(matchElement);
+                        });
 
-                    // Recorremos los likes
-                    filteredLikesWithoutMatches.forEach(likeEmail => {
-                        const likeElement = document.createElement("div");
-                        likeElement.classList.add("col-12", "col-md-6", "mb-4");
+                        // Recorremos los likes
+                        filteredLikesWithoutMatches.forEach(likeEmail => {
+                            const likeElement = document.createElement("div");
+                            likeElement.classList.add("col-12", "col-md-6", "mb-4");
 
-                        // Crear mensaje de "me gusta"
-                        const likeMessage = `¡A ${likeEmail} le gustas!`;
+                            // Crear mensaje de "me gusta"
+                            const likeMessage = `¡A ${likeEmail} le gustas!`;
 
-                        likeElement.innerHTML = `
+                            likeElement.innerHTML = `
                             <div class="card">
                                 <div class="card-body">
                                     <h5 class="card-title">${likeMessage}</h5>
@@ -84,62 +84,63 @@ export function cargarLikes(obtenerLikesDesdeIndexedDB,obtenerUsuariosDesdeIndex
                             </div>
                         `;
 
-                        // Añadir el elemento al contenedor de likes
-                        likesContainer.appendChild(likeElement);
-                    });
+                            // Añadir el elemento al contenedor de likes
+                            likesContainer.appendChild(likeElement);
+                        });
 
-                    // Agregar evento a los botones "Ver perfil"
-                    const viewProfileButtons = document.querySelectorAll(".view-profile-button");
-                    viewProfileButtons.forEach(button => {
-                        button.addEventListener("click", function (event) {
-                            event.preventDefault();
-                            const userEmail = button.getAttribute("data-email");
-                            const content = document.getElementById("main");
-                            // Guardar el correo en sessionStorage
-                            sessionStorage.getItem("selectedUserEmail", userEmail);
-                            
+                        // Agregar evento a los botones "Ver perfil"
+                        const viewProfileButtons = document.querySelectorAll(".view-profile-button");
+                        viewProfileButtons.forEach(button => {
+                            button.addEventListener("click", function (event) {
+                                event.preventDefault();
+                                const userEmail = button.getAttribute("data-email");
+                                const content = document.getElementById("main");
+                                // Guardar el correo en sessionStorage
+                                sessionStorage.getItem("selectedUserEmail", userEmail);
+
                                 // Si está autenticado, cargar el perfil
                                 fetch("./views/verPerfil.html")
-                                    .then((response) => {
-                                        if (!response.ok) throw new Error("Página no encontrada.");
-                                        return response.text();
-                                    })
-                                    .then((html) => {
-                                        content.innerHTML = html;
-                                        loadUserProfile(obtenerUsuariosDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, userEmail);
-                                    })
-                                    .catch((error) => {
-                                        content.innerHTML = `<p>Error: ${error.message}</p>`;
-                                    });
-                            
-                        });
-                    });
+                                        .then((response) => {
+                                            if (!response.ok)
+                                                throw new Error("Página no encontrada.");
+                                            return response.text();
+                                        })
+                                        .then((html) => {
+                                            content.innerHTML = html;
+                                            loadUserProfile(obtenerUsuariosDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, userEmail);
+                                        })
+                                        .catch((error) => {
+                                            content.innerHTML = `<p>Error: ${error.message}</p>`;
+                                        });
 
-                } else {
-                    // Si no hay "me gusta" filtrados, mostrar un mensaje
-                    likesContainer.innerHTML = `
+                            });
+                        });
+
+                    } else {
+                        // Si no hay "me gusta" filtrados, mostrar un mensaje
+                        likesContainer.innerHTML = `
                         <div class="alert alert-warning text-center" role="alert">
                             No tienes "Me Gusta" registrados.
                         </div>
                     `;
-                }
-            } else {
-                // Si no hay "me gusta", mostrar un mensaje
-                likesContainer.innerHTML = `
+                    }
+                } else {
+                    // Si no hay "me gusta", mostrar un mensaje
+                    likesContainer.innerHTML = `
                     <div class="alert alert-info text-center" role="alert">
                         No hay "Me Gusta" registrados.
                     </div>
                 `;
-            }
-        })
-        .catch(error => {
-            console.error("Error al obtener los 'me gusta' desde IndexedDB:", error);
-            likesContainer.innerHTML = `
+                }
+            })
+            .catch(error => {
+                console.error("Error al obtener los 'me gusta' desde IndexedDB:", error);
+                likesContainer.innerHTML = `
                 <div class="alert alert-danger text-center" role="alert">
                     Hubo un problema al acceder a la base de datos.
                 </div>
             `;
-        });
+            });
 }
 
 // Configurar el formulario de inicio de sesión
@@ -182,44 +183,44 @@ export function login(obtenerUsuariosDesdeIndexedDB) {
 export function loadUserProfile(obtenerUsuariosDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, emailUsuario) {
     // Primero, obtenemos los usuarios desde IndexedDB
     obtenerUsuariosDesdeIndexedDB()
-        .then((usuarios) => {
-            // Buscar al usuario con el email especificado
-            const user = usuarios.find(u => u.email === emailUsuario);
-            console.log(user);
-            if (user) {
-                // Rellenar los datos del perfil
-                document.getElementById("userName").textContent = `Nombre: ${user.nombre}`;
-                document.getElementById("userAge").textContent = `Edad: ${user.edad}`;
-                document.getElementById("userCity").textContent = `Ciudad: ${user.ciudad}`;
+            .then((usuarios) => {
+                // Buscar al usuario con el email especificado
+                const user = usuarios.find(u => u.email === emailUsuario);
+                console.log(user);
+                if (user) {
+                    // Rellenar los datos del perfil
+                    document.getElementById("userName").textContent = `Nombre: ${user.nombre}`;
+                    document.getElementById("userAge").textContent = `Edad: ${user.edad}`;
+                    document.getElementById("userCity").textContent = `Ciudad: ${user.ciudad}`;
 
-                // Si la foto está en Base64, la asignamos al atributo src del img
-                if (user.foto) {
-                    document.getElementById("userImage").src = `data:image/jpeg;base64,${user.foto}`;
+                    // Si la foto está en Base64, la asignamos al atributo src del img
+                    if (user.foto) {
+                        document.getElementById("userImage").src = `data:image/jpeg;base64,${user.foto}`;
+                    } else {
+                        // Si no hay foto, se asigna una imagen por defecto
+                        document.getElementById("userImage").src = "https://via.placeholder.com/100";
+                    }
+
+                    // Obtener las aficiones del usuario
+                    return obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario);
                 } else {
-                    // Si no hay foto, se asigna una imagen por defecto
-                    document.getElementById("userImage").src = "https://via.placeholder.com/100";
+                    throw new Error("Usuario no encontrado.");
                 }
-
-                // Obtener las aficiones del usuario
-                return obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario);
-            } else {
-                throw new Error("Usuario no encontrado.");
-            }
-        })
-        .then((aficiones) => {
-            // Rellenar las aficiones
-            const hobbiesList = document.getElementById("userHobbies");
-            hobbiesList.innerHTML = ""; // Limpiar la lista de aficiones antes de llenarla
-            aficiones.forEach((aficion) => {
-                const li = document.createElement("li");
-                li.textContent = aficion.nombre;
-                hobbiesList.appendChild(li);
+            })
+            .then((aficiones) => {
+                // Rellenar las aficiones
+                const hobbiesList = document.getElementById("userHobbies");
+                hobbiesList.innerHTML = ""; // Limpiar la lista de aficiones antes de llenarla
+                aficiones.forEach((aficion) => {
+                    const li = document.createElement("li");
+                    li.textContent = aficion.nombre;
+                    hobbiesList.appendChild(li);
+                });
+            })
+            .catch((error) => {
+                console.error("Error al cargar el perfil:", error);
+                alert("Error al cargar el perfil.");
             });
-        })
-        .catch((error) => {
-            console.error("Error al cargar el perfil:", error);
-            alert("Error al cargar el perfil.");
-        });
 }
 
 export async function buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, content, view) {
@@ -235,7 +236,7 @@ export async function buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesd
             const aficiones = await obtenerAficionesDesdeIndexedDB();
 
             // Limpiar contenido anterior
-            busquedaExtra.innerHTML = ''; 
+            busquedaExtra.innerHTML = '';
 
             // Añadir el label principal
             const labelPrincipal = document.createElement("label");
@@ -324,12 +325,12 @@ export async function buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesd
                             const hasSelectedAficion = selectedAficiones.length === 0 || userAficiones.some(aficion => selectedAficiones.includes(aficion.nombre));
 
                             return (
-                                (!genero || generoValue.includes(user.genero)) &&
-                                (!isNaN(minAge) && user.edad >= minAge) &&
-                                (!isNaN(maxAge) && user.edad <= maxAge) &&
-                                (!ciudad || userCiudad === ciudad) &&
-                                hasSelectedAficion // Filtrar por aficiones
-                            ) ? user : null;
+                                    (!genero || generoValue.includes(user.genero)) &&
+                                    (!isNaN(minAge) && user.edad >= minAge) &&
+                                    (!isNaN(maxAge) && user.edad <= maxAge) &&
+                                    (!ciudad || userCiudad === ciudad) &&
+                                    hasSelectedAficion // Filtrar por aficiones
+                                    ) ? user : null;
                         }));
 
                         // Filtrar los resultados nulos
@@ -411,7 +412,7 @@ export async function buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesd
                                                     })
                                                     .then((html) => {
                                                         content.innerHTML = html;
-                                                        loadUserProfile(obtenerUsuariosDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB,isSelectedUserEmail);
+                                                        loadUserProfile(obtenerUsuariosDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, isSelectedUserEmail);
                                                     })
                                                     .catch((error) => {
                                                         content.innerHTML = `<p>Error: ${error.message}</p>`;
@@ -480,80 +481,91 @@ export function cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, content) 
         return;
     }
 
-    const selectElement = document.getElementById("aficionesSelect");
     const detailsElement = document.getElementById("aficionDetails");
 
-    // Verificar que los elementos existen
-    if (!selectElement || !detailsElement) {
-        console.error("Los elementos selectElement o detailsElement no están disponibles en el DOM.");
+    if (!detailsElement) {
+        console.error("El elemento detailsElement no está disponible en el DOM.");
         return;
     }
 
     // Limpiar el contenido existente
-    selectElement.innerHTML = `<option value="" disabled selected>Ver aficiones</option>`;
     detailsElement.innerHTML = "";
 
     // Cargar aficiones del usuario
     obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario)
-        .then((aficiones) => {
-            if (aficiones.length === 0) {
-                // Si no hay aficiones, mostramos un mensaje
-                selectElement.style.display = "none"; // Ocultamos el desplegable
-                detailsElement.innerHTML = "<p>No tienes aficiones registradas.</p>";
-                return;
-            }
-
-            // Si hay aficiones, mostramos el desplegable
-            selectElement.style.display = "block"; // Aseguramos que el desplegable esté visible
-
-            // Mostrar las aficiones como badges
-            aficiones.forEach((aficion) => {
-                if (!aficion.nombre) {
-                    console.warn(`Afición con ID ${aficion.idAficion} no tiene nombre.`);
+            .then((aficiones) => {
+                if (aficiones.length === 0) {
+                    detailsElement.innerHTML =
+                            "<p class='alert alert-info'>No tienes aficiones registradas.</p>";
+                    return;
                 }
 
-                // Crear badge para cada afición
-                const nombreAficion = aficion.nombre || "Nombre no disponible";
-                const badge = document.createElement("span");
-                badge.classList.add("badge", "bg-primary", "rounded-pill", "me-2");
-                badge.textContent = nombreAficion;
+                // Crear tarjetas para cada afición
+                aficiones.forEach((aficion) => {
+                    const card = document.createElement("div");
+                    card.classList.add(
+                            "col-12",
+                            "col-sm-6",
+                            "col-md-4",
+                            "d-flex",
+                            "align-items-stretch"
+                            );
 
-                // Añadir la afición al contenedor de aficiones
-                detailsElement.appendChild(badge);
+                    card.innerHTML = `
+                    <div class="card shadow-sm border-light rounded-3 overflow-hidden">
+                        <img src="https://via.placeholder.com/350x200?text=${encodeURIComponent(
+                            aficion.nombre
+                            )}" class="card-img-top" alt="${aficion.nombre}">
+                        <div class="card-body">
+                            <h5 class="card-title">${aficion.nombre}</h5>
+                        </div>
+                    </div>
+                `;
+
+                    detailsElement.appendChild(card);
+                });
+            })
+            .catch((error) => {
+                console.error("Error al cargar aficiones:", error);
+                detailsElement.innerHTML = `<p class="alert alert-danger">Error al cargar aficiones: ${error}</p>`;
             });
-        })
-        .catch((error) => {
-            console.error("Error al cargar aficiones:", error);
-            detailsElement.innerHTML = `<p>Error al cargar aficiones: ${error}</p>`;
-        });
 }
 
 
-export function añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, openIndexedDB) {
+export function añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, añadirAficionesSeleccionadas, openIndexedDB) {
     const loggedInUser = JSON.parse(sessionStorage.getItem("userLoggedIn"));
-    const emailUsuario = loggedInUser?.email;
 
-    if (!emailUsuario) {
+    // Verificar si el usuario está logueado y tiene un email válido
+    if (!loggedInUser || !loggedInUser.email) {
         console.error("Error: No se encontró el usuario logueado.");
         return;
     }
 
+    const emailUsuario = loggedInUser.email;
+
     const checkboxContainer = document.getElementById("aficionesCheckboxContainer");
     const guardarAficionesButton = document.getElementById("guardarAficionesButton");
 
+    // Verificar si los elementos del DOM están disponibles
     if (!checkboxContainer || !guardarAficionesButton) {
         console.error("Elementos necesarios no encontrados en el DOM.");
         return;
     }
 
-    checkboxContainer.innerHTML = ""; // Clear any existing checkboxes
+    checkboxContainer.innerHTML = ""; // Limpiar checkboxes existentes
 
+    // Obtener aficiones desde IndexedDB
     Promise.all([
         obtenerAficionesDesdeIndexedDB(),
         obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario)
     ])
             .then(([todasAficiones, aficionesUsuario]) => {
+                console.log("Todas las aficiones:", todasAficiones);
+                console.log("Aficiones del usuario:", aficionesUsuario);
+
+                // Obtener los IDs de las aficiones que ya tiene el usuario
                 const idsAficionesUsuario = aficionesUsuario.map(aficion => aficion.idAficion);
+                // Filtrar las aficiones disponibles para añadir (que no estén ya asociadas al usuario)
                 const aficionesDisponibles = todasAficiones.filter(aficion => !idsAficionesUsuario.includes(aficion.idAficion));
 
                 if (aficionesDisponibles.length === 0) {
@@ -565,58 +577,59 @@ export function añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesU
                 crearCheckboxes(aficionesDisponibles, checkboxContainer);
                 guardarAficionesButton.style.display = "block";
 
-                guardarAficionesButton.removeEventListener("click", guardarAficionesEventHandler); // Remove any previous handlers
+                // Eliminar cualquier evento anterior y agregar el nuevo
+                guardarAficionesButton.removeEventListener("click", guardarAficionesEventHandler);
                 guardarAficionesButton.addEventListener("click", guardarAficionesEventHandler);
 
                 function guardarAficionesEventHandler() {
                     const checkboxes = checkboxContainer.querySelectorAll("input[type='checkbox']");
+
+                    // Depuración: Verificar qué checkboxes están seleccionados
                     const seleccionadas = Array.from(checkboxes)
                             .filter(checkbox => checkbox.checked)
-                            .map(checkbox => Number(checkbox.value)); // Ensure values are numbers
+                            .map(checkbox => Number(checkbox.value)); // Convertir valores a números
 
+                    console.log("Aficiones seleccionadas:", seleccionadas);  // Depuración
+
+                    // Si no se selecciona ninguna afición, mostrar un mensaje y salir de la función
                     if (seleccionadas.length === 0) {
                         alert("No has seleccionado ninguna afición.");
-                        return;
+                        return; // Salir de la función sin intentar abrir IndexedDB
                     }
 
+                    // Abrir IndexedDB y añadir las nuevas aficiones
                     openIndexedDB().then(db => {
-                        const transaction = db.transaction("usuario_aficion", "readwrite");
-                        const store = transaction.objectStore("usuario_aficion");
+                        añadirAficionesSeleccionadas(db, emailUsuario, seleccionadas)
+                                .then((mensaje) => {
+                                    alert(mensaje);  // Mostrar el mensaje de éxito
+                                    const content = document.getElementById("main");
+                                    fetch("./views/añadirAficion.html")
+                                            .then((response) => {
+                                                if (!response.ok)
+                                                    throw new Error("Página no encontrada.");
+                                                return response.text();
+                                            })
+                                            .then((html) => {
+                                                content.innerHTML = html;
+                                                añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, añadirAficionesSeleccionadas, openIndexedDB);
 
-                        const existingRequest = store.getAll();
-                        existingRequest.onsuccess = () => {
-                            const existingAficiones = existingRequest.result.filter(item => item.email === emailUsuario);
-                            const existingIds = existingAficiones.map(item => Number(item.idAficion));
+                                            })
+                                            .catch((error) => {
+                                                content.innerHTML = `<p>Error: ${error.message}</p>`;
+                                            });
 
-                            const nuevasAficiones = seleccionadas.filter(idAficion => !existingIds.includes(idAficion));
-
-                            if (nuevasAficiones.length === 0) {
-                                alert("Todas las aficiones seleccionadas ya están registradas.");
-                                return;
-                            }
-
-                            nuevasAficiones.forEach(idAficion => {
-                                store.put({email: emailUsuario, idAficion});
-                            });
-
-                            transaction.oncomplete = () => {
-                                alert("¡Aficiones añadidas exitosamente!");
-                                cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, document.getElementById("main"));
-                            };
-
-                            transaction.onerror = event => {
-                                console.error("Error al guardar aficiones en IndexedDB:", event.target.error);
-                            };
-                        };
-
-                        existingRequest.onerror = event => {
-                            console.error("Error al obtener las aficiones existentes del usuario:", event.target.error);
-                        };
+                                })
+                                .catch((error) => {
+                                    console.error(error);
+                                    alert(error);  // Mostrar el error de IndexedDB
+                                });
                     }).catch(error => {
                         console.error("Error al abrir IndexedDB:", error);
+                        alert("Error al abrir IndexedDB: " + error);  // Mostrar un error si no se puede abrir IndexedDB
                     });
                 }
 
+                // Función para crear los checkboxes de las aficiones disponibles
                 function crearCheckboxes(aficionesDisponibles, container) {
                     aficionesDisponibles.forEach(aficion => {
                         const checkboxDiv = document.createElement("div");
@@ -643,7 +656,6 @@ export function añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesU
                 console.error("Error al cargar aficiones o aficiones de usuario:", error);
             });
 }
-
 
 export function eliminarAficion(obtenerAficionesUsuarioDesdeIndexedDB, openIndexedDB) {
     const loggedInUser = JSON.parse(sessionStorage.getItem("userLoggedIn"));
