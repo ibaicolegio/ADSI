@@ -1,4 +1,4 @@
-import {cargarLikes, login, buscar, cargarFotoYMensajeBienvenida, cargarAficiones, añadirAficion, eliminarAficion} from "./js/funciones.js";
+import {cargarLikes,loadUserProfile, login, buscar, cargarFotoYMensajeBienvenida, cargarAficiones, añadirAficion, eliminarAficion} from "./js/funciones.js";
 import {openIndexedDB, cargarYAlmacenarDatos, obtenerUsuariosDesdeIndexedDB, obtenerLikesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, obtenerAficionesDesdeIndexedDB} from "./js/bd.js";
 // Objeto para almacenar las páginas cargadas
 const cache = {};
@@ -102,6 +102,7 @@ function loadPaginaUsuario() {
                             })
                             .then((html) => {
                                 content.innerHTML = html;
+                                loadUserProfile(obtenerUsuariosDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB,isSelectedUserEmail);
                             })
                             .catch((error) => {
                                 content.innerHTML = `<p>Error: ${error.message}</p>`;

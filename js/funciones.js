@@ -158,8 +158,48 @@ export function login(obtenerUsuariosDesdeIndexedDB) {
     }
 }
 
+export function loadUserProfile(obtenerUsuariosDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, emailUsuario) {
+    // Primero, obtenemos los usuarios desde IndexedDB
+    obtenerUsuariosDesdeIndexedDB()
+        .then((usuarios) => {
+            // Buscar al usuario con el email especificado
+            const user = usuarios.find(u => u.email === emailUsuario);
+            console.log(user);
+            if (user) {
+                // Rellenar los datos del perfil
+                document.getElementById("userName").textContent = `Nombre: ${user.nombre}`;
+                document.getElementById("userAge").textContent = `Edad: ${user.edad}`;
+                document.getElementById("userCity").textContent = `Ciudad: ${user.ciudad}`;
 
+                // Si la foto está en Base64, la asignamos al atributo src del img
+                if (user.foto) {
+                    document.getElementById("userImage").src = `data:image/jpeg;base64,${user.foto}`;
+                } else {
+                    // Si no hay foto, se asigna una imagen por defecto
+                    document.getElementById("userImage").src = "https://via.placeholder.com/100";
+                }
 
+                // Obtener las aficiones del usuario
+                return obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario);
+            } else {
+                throw new Error("Usuario no encontrado.");
+            }
+        })
+        .then((aficiones) => {
+            // Rellenar las aficiones
+            const hobbiesList = document.getElementById("userHobbies");
+            hobbiesList.innerHTML = ""; // Limpiar la lista de aficiones antes de llenarla
+            aficiones.forEach((aficion) => {
+                const li = document.createElement("li");
+                li.textContent = aficion.nombre;
+                hobbiesList.appendChild(li);
+            });
+        })
+        .catch((error) => {
+            console.error("Error al cargar el perfil:", error);
+            alert("Error al cargar el perfil.");
+        });
+}
 
 export async function buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, content, view) {
     // Obtener el formulario de búsqueda y el contenedor de resultados
@@ -350,6 +390,7 @@ export async function buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesd
                                                     })
                                                     .then((html) => {
                                                         content.innerHTML = html;
+                                                        loadUserProfile(obtenerUsuariosDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB,isSelectedUserEmail);
                                                     })
                                                     .catch((error) => {
                                                         content.innerHTML = `<p>Error: ${error.message}</p>`;
