@@ -41,7 +41,23 @@ export function cargarLikes(obtenerLikesDesdeIndexedDB, obtenerUsuariosDesdeInde
                         // Filtrar los likes para excluir usuarios que ya están en matches
                         const matchEmails = matches.map(match => match.user2); // Emails del otro usuario en los matches
                         const filteredLikesWithoutMatches = likes.filter(email => !matchEmails.includes(email));
-
+                        console.log(matchEmails);
+                        if (matchEmails.length === 0) {
+                            console.log("no hay matches");
+                            matchContainer.innerHTML = `
+                        <div class="alert alert-warning text-center" role="alert">
+                            No tienes "Matches" aún.
+                        </div>
+                    `;
+                        }
+                        if (filteredLikesWithoutMatches.length === 0) {
+                            console.log("no hay likes");
+                            likesContainer.innerHTML = `
+                        <div class="alert alert-warning text-center" role="alert">
+                            No tienes "Matches" aún.
+                        </div>
+                    `;
+                        }
                         // Recorremos los matches primero
                         matches.forEach(match => {
                             const matchElement = document.createElement("div");
@@ -117,17 +133,22 @@ export function cargarLikes(obtenerLikesDesdeIndexedDB, obtenerUsuariosDesdeInde
                         });
 
                     } else {
+                        matchContainer.innerHTML = `
+                        <div class="alert alert-warning text-center" role="alert">
+                            No tienes "Matches" aún.
+                        </div>
+                    `;
                         // Si no hay "me gusta" filtrados, mostrar un mensaje
                         likesContainer.innerHTML = `
                         <div class="alert alert-warning text-center" role="alert">
-                            No tienes "Me Gusta" registrados.
+                            No tienes "Matches" aún.
                         </div>
                     `;
                     }
                 } else {
                     // Si no hay "me gusta", mostrar un mensaje
                     likesContainer.innerHTML = `
-                    <div class="alert alert-info text-center" role="alert">
+                    <div class="alert alert-warning text-center" role="alert">
                         No hay "Me Gusta" registrados.
                     </div>
                 `;
@@ -398,7 +419,7 @@ export async function buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesd
                             if (!isAuthenticated) {
                                 const userImages = document.querySelectorAll('img.user-image'); // Seleccionar solo imágenes de usuarios
                                 userImages.forEach(img => {
-                                img.style.filter = 'blur(5px)'; // Aplica el desenfoque
+                                    img.style.filter = 'blur(5px)'; // Aplica el desenfoque
                                 });
                             }
 
@@ -927,7 +948,7 @@ function actualizarMarcadores(map, circle, obtenerUsuariosDesdeIndexedDB) {
             });
 }
 
-export function modificarPerfil(db, actualizarUsuarioEnIndexedDB,obtenerUsuariosDesdeIndexedDB) {
+export function modificarPerfil(db, actualizarUsuarioEnIndexedDB, obtenerUsuariosDesdeIndexedDB) {
     const form = document.getElementById("localStorageForm");
     const profilePhotoInput = document.getElementById("profilePhoto");
     const citySelect = document.getElementById("citySelect");
