@@ -170,6 +170,8 @@ export function cargarLikes(obtenerLikesDesdeIndexedDB, obtenerUsuariosDesdeInde
             });
 }
 
+
+
 // Configurar el formulario de inicio de sesión
 export function login(obtenerUsuariosDesdeIndexedDB) {
     const loginForm = document.getElementById("loginForm"); // Asegúrate de que exista en `html/login.html`
@@ -287,9 +289,20 @@ export async function buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesd
     const busquedaExtra = document.getElementById("busquedaExtra");
     const isAuthenticated = sessionStorage.getItem("userLoggedIn");
 
+    // Verificar si hay un usuario logueado
+    let loggedInUserEmail = null;
     if (isAuthenticated) {
         try {
-            // Obtener aficiones desde IndexedDB
+            const loggedInUser = JSON.parse(isAuthenticated);
+            loggedInUserEmail = loggedInUser.email;
+        } catch (error) {
+            console.error("Error al parsear el usuario logueado:", error);
+        }
+    }
+
+    // Obtener aficiones si está autenticado
+    if (isAuthenticated) {
+        try {
             const aficiones = await obtenerAficionesDesdeIndexedDB();
 
             // Limpiar contenido anterior
@@ -351,147 +364,133 @@ export async function buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesd
             // Obtener las aficiones seleccionadas
             const selectedAficiones = Array.from(document.querySelectorAll('input[name="aficiones"]:checked')).map(checkbox => checkbox.value);
 
-            // Obtener la lista de usuarios desde IndexedDB
-            obtenerUsuariosDesdeIndexedDB()
-                    .then(async (users) => {
-                        let generoValue = ""; // Convertir las opciones del formulario a "M" o "H"
-                        switch (genero) {
-                            case "mujerHombre":
-                            case "hombreHombre":
-                                generoValue = "H";
-                                break;
-                            case "hombreMujer":
-                            case "mujerMujer":
-                                generoValue = "M";
-                                break;
-                            case "mujerAmbos":
-                            case "hombreAmbos":
-                                generoValue = ["H", "M"];
-                                break;
-                        }
+            try {
+                // Obtener la lista de usuarios desde IndexedDB
+                const users = await obtenerUsuariosDesdeIndexedDB();
 
-                        // Filtrar los usuarios según los criterios
-                        const filteredUsers = await Promise.all(users.map(async user => {
-                            const userCiudad = user.ciudad ? user.ciudad.toLowerCase() : "";
-                            const userEmail = user.email;
+                let generoValue = ""; // Convertir las opciones del formulario a "M" o "H"
+                switch (genero) {
+                    case "mujerHombre":
+                    case "hombreHombre":
+                        generoValue = "H";
+                        break;
+                    case "hombreMujer":
+                    case "mujerMujer":
+                        generoValue = "M";
+                        break;
+                    case "mujerAmbos":
+                    case "hombreAmbos":
+                        generoValue = ["H", "M"];
+                        break;
+                }
 
-                            // Obtener las aficiones del usuario
-                            const userAficiones = await obtenerAficionesUsuarioDesdeIndexedDB(userEmail);
+                // Filtrar los usuarios según los criterios
+                const filteredUsers = await Promise.all(users.map(async user => {
+                    const userCiudad = user.ciudad ? user.ciudad.toLowerCase() : "";
+                    const userEmail = user.email;
 
-                            // Verificar si el usuario tiene alguna de las aficiones seleccionadas
-                            const hasSelectedAficion = selectedAficiones.length === 0 || userAficiones.some(aficion => selectedAficiones.includes(aficion.nombre));
+                    // Excluir al usuario logueado
+                    if (userEmail === loggedInUserEmail) {
+                        return null;
+                    }
 
-                            return (
-                                    (!genero || generoValue.includes(user.genero)) &&
-                                    (!isNaN(minAge) && user.edad >= minAge) &&
-                                    (!isNaN(maxAge) && user.edad <= maxAge) &&
-                                    (!ciudad || userCiudad === ciudad) &&
-                                    hasSelectedAficion // Filtrar por aficiones
-                                    ) ? user : null;
-                        }));
+                    // Obtener las aficiones del usuario
+                    const userAficiones = await obtenerAficionesUsuarioDesdeIndexedDB(userEmail);
 
-                        // Filtrar los resultados nulos
-                        const validFilteredUsers = filteredUsers.filter(user => user !== null);
+                    // Verificar si el usuario tiene alguna de las aficiones seleccionadas
+                    const hasSelectedAficion = selectedAficiones.length === 0 || userAficiones.some(aficion => selectedAficiones.includes(aficion.nombre));
 
-                        // Limpiar resultados previos
-                        searchResultsContainer.innerHTML = "";
+                    return (
+                        (!genero || generoValue.includes(user.genero)) &&
+                        (!isNaN(minAge) && user.edad >= minAge) &&
+                        (!isNaN(maxAge) && user.edad <= maxAge) &&
+                        (!ciudad || userCiudad === ciudad) &&
+                        hasSelectedAficion
+                    ) ? user : null;
+                }));
 
-                        // Mostrar los resultados o un mensaje si no hay coincidencias
-                        if (validFilteredUsers.length > 0) {
-                            validFilteredUsers.forEach(user => {
-                                const userCard = document.createElement("div");
-                                userCard.classList.add("col-12", "col-md-6", "mb-4");
+                // Filtrar los resultados nulos
+                const validFilteredUsers = filteredUsers.filter(user => user !== null);
 
-                                userCard.innerHTML = `
-                                <div class="card">
-                                    <div class="card-body d-flex align-items-center">
-                                        <div class="flex-grow-1">
-                                             <h5 class="card-title">${user.nombre}</h5>
-                                              <p class="card-text">Edad: ${user.edad}</p>
-                                              <p class="card-text">Ciudad: ${user.ciudad}</p>
-                                        <a href="#" id="viewProfileButton" class="btn btn-primary view-profile-button" data-email="${user.email}">Ver perfil</a>
-                                    </div>
-                                    <img 
-                                        src="data:image/jpeg;base64,${user.foto}" 
-                                        class="rounded-circle user-image ms-3" 
-                                        style="width: 100px; height: 100px; object-fit: cover;">
-                                    </div>
-                                  </div>
-                            `;
-                                searchResultsContainer.appendChild(userCard);
-                            });
+                // Limpiar resultados previos
+                searchResultsContainer.innerHTML = "";
 
+                // Mostrar los resultados o un mensaje si no hay coincidencias
+                if (validFilteredUsers.length > 0) {
+                    validFilteredUsers.forEach(user => {
+                        const userCard = document.createElement("div");
+                        userCard.classList.add("col-12", "col-md-6", "mb-4");
+
+                        userCard.innerHTML = `
+                            <div class="card">
+                                <div class="card-body d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                         <h5 class="card-title">${user.nombre}</h5>
+                                          <p class="card-text">Edad: ${user.edad}</p>
+                                          <p class="card-text">Ciudad: ${user.ciudad}</p>
+                                    <a href="#" id="viewProfileButton" class="btn btn-primary view-profile-button" data-email="${user.email}">Ver perfil</a>
+                                </div>
+                                <img 
+                                    src="data:image/jpeg;base64,${user.foto}" 
+                                    class="rounded-circle user-image ms-3" 
+                                    style="width: 100px; height: 100px; object-fit: cover;">
+                                </div>
+                              </div>
+                        `;
+                        searchResultsContainer.appendChild(userCard);
+                    });
+
+                    // Agregar evento a los botones "Ver perfil"
+                    const viewProfileButtons = document.querySelectorAll("#viewProfileButton");
+                    viewProfileButtons.forEach(button => {
+                        button.addEventListener("click", function (event) {
+                            event.preventDefault();
+                            const userEmail = button.getAttribute("data-email");
+
+                            // Guardar el correo en sessionStorage
+                            sessionStorage.setItem("selectedUserEmail", userEmail);
+
+                            // Verificar si el usuario está autenticado
                             const isAuthenticated = sessionStorage.getItem("userLoggedIn");
                             if (!isAuthenticated) {
-                                const userImages = document.querySelectorAll('img.user-image'); // Seleccionar solo imágenes de usuarios
-                                userImages.forEach(img => {
-                                    img.style.filter = 'blur(5px)'; // Aplica el desenfoque
-                                });
+                                fetch("./html/login.html")
+                                    .then((response) => response.text())
+                                    .then((html) => {
+                                        content.innerHTML = html;
+                                        login(obtenerUsuariosDesdeIndexedDB);
+                                    })
+                                    .catch((error) => {
+                                        content.innerHTML = `<p>Error: ${error.message}</p>`;
+                                    });
+                            } else {
+                                const isSelectedUserEmail = sessionStorage.getItem("selectedUserEmail");
+                                if (isSelectedUserEmail) {
+                                    fetch("./html/verPerfil.html")
+                                        .then((response) => response.text())
+                                        .then((html) => {
+                                            content.innerHTML = html;
+                                            loadUserProfile(obtenerUsuariosDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, isSelectedUserEmail);
+                                        })
+                                        .catch((error) => {
+                                            content.innerHTML = `<p>Error: ${error.message}</p>`;
+                                        });
+                                }
                             }
-
-                            // Agregar evento a los botones "Ver perfil"
-                            const viewProfileButtons = document.querySelectorAll("#viewProfileButton");
-                            viewProfileButtons.forEach(button => {
-                                button.addEventListener("click", function (event) {
-                                    event.preventDefault();
-                                    const userEmail = button.getAttribute("data-email");
-
-                                    // Guardar el correo en sessionStorage
-                                    sessionStorage.setItem("selectedUserEmail", userEmail);
-
-                                    // Verificar si el usuario está autenticado
-                                    const isAuthenticated = sessionStorage.getItem("userLoggedIn");
-                                    if (!isAuthenticated) {
-                                        fetch("./html/login.html")
-                                                .then((response) => {
-                                                    if (!response.ok)
-                                                        throw new Error("Página no encontrada.");
-                                                    return response.text();
-                                                })
-                                                .then((html) => {
-                                                    content.innerHTML = html;
-                                                    login(obtenerUsuariosDesdeIndexedDB);
-                                                })
-                                                .catch((error) => {
-                                                    content.innerHTML = `<p>Error: ${error.message}</p>`;
-                                                });
-                                    } else {
-                                        const isAuthenticated = sessionStorage.getItem("userLoggedIn");
-                                        const isSelectedUserEmail = sessionStorage.getItem("selectedUserEmail");
-                                        if (isAuthenticated && isSelectedUserEmail) {
-                                            fetch("./html/verPerfil.html")
-                                                    .then((response) => {
-                                                        if (!response.ok)
-                                                            throw new Error("Página no encontrada.");
-                                                        return response.text();
-                                                    })
-                                                    .then((html) => {
-                                                        content.innerHTML = html;
-                                                        loadUserProfile(obtenerUsuariosDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, isSelectedUserEmail);
-                                                    })
-                                                    .catch((error) => {
-                                                        content.innerHTML = `<p>Error: ${error.message}</p>`;
-                                                    });
-                                        }
-                                        // Si está autenticado, permitir ver el perfil
-                                        console.log(`Mostrar perfil de usuario: ${userEmail}`);
-                                        // Aquí podrías cargar la página de detalles de perfil o hacer lo que desees
-                                    }
-                                });
-                            });
-
-                        } else {
-                            searchResultsContainer.innerHTML = `
-                            <p class="text-center">No se encontraron resultados que coincidan con la búsqueda.</p>
-                        `;
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error al obtener usuarios:", error);
+                        });
                     });
+                } else {
+                    searchResultsContainer.innerHTML = `
+                        <p class="text-center">No se encontraron resultados que coincidan con la búsqueda.</p>
+                    `;
+                }
+            } catch (error) {
+                console.error("Error al obtener usuarios:", error);
+            }
         });
     }
 }
+
+
 
 export function cargarFotoYMensajeBienvenida(obtenerUsuariosDesdeIndexedDB) {
     // Obtener el email del usuario actualmente logueado desde sessionStorage
