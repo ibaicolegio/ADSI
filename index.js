@@ -119,7 +119,7 @@ function loadPaginaUsuario() {
                     logoutButton.addEventListener("click", function () {
                         sessionStorage.removeItem("userLoggedIn"); // Eliminar el usuario de sessionStorage
                         alert("Has cerrado sesión.");
-                        location.reload(); // Recargar para redirigir al login
+                        loadPaginaPrincipal(); // Recargar para redirigir al login
                     });
                 }
 
