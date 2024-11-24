@@ -54,7 +54,7 @@ export function cargarLikes(obtenerLikesDesdeIndexedDB, obtenerUsuariosDesdeInde
                             console.log("no hay likes");
                             likesContainer.innerHTML = `
                         <div class="alert alert-warning text-center" role="alert">
-                            No tienes "Matches" aún.
+                            No tienes "Likes" aún.
                         </div>
                     `;
                         }
@@ -141,17 +141,23 @@ export function cargarLikes(obtenerLikesDesdeIndexedDB, obtenerUsuariosDesdeInde
                         // Si no hay "me gusta" filtrados, mostrar un mensaje
                         likesContainer.innerHTML = `
                         <div class="alert alert-warning text-center" role="alert">
-                            No tienes "Matches" aún.
+                            No tienes "Likes" aún.
                         </div>
                     `;
                     }
                 } else {
                     // Si no hay "me gusta", mostrar un mensaje
-                    likesContainer.innerHTML = `
-                    <div class="alert alert-warning text-center" role="alert">
-                        No hay "Me Gusta" registrados.
-                    </div>
-                `;
+                    matchContainer.innerHTML = `
+                        <div class="alert alert-warning text-center" role="alert">
+                            No tienes "Matches" aún.
+                        </div>
+                    `;
+                        // Si no hay "me gusta" filtrados, mostrar un mensaje
+                        likesContainer.innerHTML = `
+                        <div class="alert alert-warning text-center" role="alert">
+                            No tienes "Likes" aún.
+                        </div>
+                    `;
                 }
             })
             .catch(error => {
