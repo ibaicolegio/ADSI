@@ -64,7 +64,7 @@ export function cargarLikes(obtenerLikesDesdeIndexedDB, obtenerUsuariosDesdeInde
                             matchElement.classList.add("col-12", "col-md-6", "mb-4");
 
                             // Crear mensaje de match con corazón
-                            const matchMessage = `¡Es un match con ${match.user2}! Ambos se gustan. <i class="fa fa-heart" style="color: red;"></i>`;
+                            const matchMessage = `¡Es un match con ${match.user2}! Ambos os gustais. <i class="fa fa-heart" style="color: red;"></i>`;
 
                             matchElement.innerHTML = `
                             <div class="card">
