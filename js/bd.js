@@ -294,3 +294,33 @@ export function añadirAficionesSeleccionadas(db, emailUsuario, aficionesSelecci
 }
 
 
+export function eliminarAficionesSeleccionadas(db, emailUsuario, aficionesSeleccionadas) {
+    return new Promise((resolve, reject) => {
+        // Verificar si aficionesSeleccionadas es un array válido y contiene elementos
+        if (!Array.isArray(aficionesSeleccionadas) || aficionesSeleccionadas.length === 0) {
+            reject("No se han seleccionado aficiones para eliminar.");
+            return;
+        }
+
+        const transaction = db.transaction('usuario_aficion', 'readwrite');
+        const objectStore = transaction.objectStore('usuario_aficion');
+
+        // Realizar las eliminaciones de las aficiones seleccionadas
+        aficionesSeleccionadas.forEach((idAficion) => {
+            // Convertir idAficion a string para garantizar consistencia en las claves
+            const idAficionStr = String(idAficion);  // Convertir a cadena
+            const key = [emailUsuario, idAficionStr]; // Suponiendo que las claves son compuestas
+            console.log(`Eliminando afición: ${JSON.stringify(key)}`);
+            objectStore.delete(key);
+        });
+
+        transaction.oncomplete = function () {
+            resolve("¡Aficiones eliminadas exitosamente!");
+        };
+
+        transaction.onerror = function (event) {
+            console.error("Error en la transacción", event);
+            reject(`Error al eliminar aficiones en IndexedDB: ${event.target.error}`);
+        };
+    });
+}

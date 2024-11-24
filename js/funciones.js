@@ -687,37 +687,104 @@ export function añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesU
             });
 }
 
-export function eliminarAficion(obtenerAficionesUsuarioDesdeIndexedDB, openIndexedDB) {
-    const loggedInUser = JSON.parse(sessionStorage.getItem("userLoggedIn"));
-    const emailUsuario = loggedInUser?.email;
 
-    if (!emailUsuario) {
+export function eliminarAficiones(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, eliminarAficionesSeleccionadas, openIndexedDB) {
+    const loggedInUser = JSON.parse(sessionStorage.getItem("userLoggedIn"));
+
+    // Verificar si el usuario está logueado y tiene un email válido
+    if (!loggedInUser || !loggedInUser.email) {
         console.error("Error: No se encontró el usuario logueado.");
         return;
     }
 
+    const emailUsuario = loggedInUser.email;
+
     const checkboxContainer = document.getElementById("aficionesCheckboxContainer");
     const eliminarAficionesButton = document.getElementById("eliminarAficionesButton");
 
+    // Verificar si los elementos del DOM están disponibles
     if (!checkboxContainer || !eliminarAficionesButton) {
         console.error("Elementos necesarios no encontrados en el DOM.");
         return;
     }
 
-    // Limpiar contenedor de checkboxes
-    checkboxContainer.innerHTML = "";
+    checkboxContainer.innerHTML = ""; // Limpiar checkboxes existentes
 
-    // Obtener las aficiones del usuario desde IndexedDB
-    obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario)
-            .then(aficionesUsuario => {
-                if (aficionesUsuario.length === 0) {
-                    checkboxContainer.innerHTML = "<p>No tienes aficiones para eliminar.</p>";
-                    eliminarAficionesButton.style.display = "none";
+    // Obtener todas las aficiones y las seleccionadas por el usuario desde IndexedDB
+    Promise.all([
+        obtenerAficionesDesdeIndexedDB(), // Todas las aficiones disponibles
+        obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario) // Aficiones seleccionadas por el usuario
+    ])
+        .then(([todasAficiones, aficionesUsuario]) => {
+            console.log("Todas las aficiones disponibles:", todasAficiones);
+            console.log("Aficiones del usuario:", aficionesUsuario);
+
+            // Obtener las aficiones que el usuario tiene seleccionadas
+            const idsAficionesUsuario = aficionesUsuario.map(aficion => Number(aficion.idAficion));
+            const aficionesSeleccionadas = todasAficiones.filter(aficion => idsAficionesUsuario.includes(Number(aficion.idAficion)));
+
+            if (aficionesSeleccionadas.length === 0) {
+                checkboxContainer.innerHTML = "<p>No tienes aficiones seleccionadas para eliminar.</p>";
+                eliminarAficionesButton.style.display = "none"; // Ocultar el botón si no hay aficiones
+                return;
+            }
+
+            crearCheckboxes(aficionesSeleccionadas, checkboxContainer);
+
+            eliminarAficionesButton.style.display = "block"; // Mostrar el botón
+
+            // Eliminar cualquier evento anterior y agregar el nuevo
+            eliminarAficionesButton.removeEventListener("click", eliminarAficionesEventHandler);
+            eliminarAficionesButton.addEventListener("click", eliminarAficionesEventHandler);
+
+            function eliminarAficionesEventHandler() {
+                const checkboxes = checkboxContainer.querySelectorAll("input[type='checkbox']");
+                const seleccionadas = Array.from(checkboxes)
+                    .filter(checkbox => checkbox.checked)
+                    .map(checkbox => Number(checkbox.value)); // Convertir valores a números
+
+                if (seleccionadas.length === 0) {
+                    alert("No has seleccionado ninguna afición para eliminar.");
                     return;
                 }
+                console.log(seleccionadas);
 
-                // Crear checkboxes para las aficiones del usuario
-                aficionesUsuario.forEach(aficion => {
+                // Abrir IndexedDB y eliminar las aficiones seleccionadas
+                openIndexedDB()
+                    .then(db => {
+                        eliminarAficionesSeleccionadas(db, emailUsuario, seleccionadas)
+                            .then((mensaje) => {
+                                alert(mensaje); // Mostrar el mensaje de éxito
+                                const content = document.getElementById("main");
+                                    fetch("./html/eliminarAficion.html")
+                                            .then((response) => {
+                                                if (!response.ok)
+                                                    throw new Error("Página no encontrada.");
+                                                return response.text();
+                                            })
+                                            .then((html) => {
+                                                content.innerHTML = html;
+                                                eliminarAficiones(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, eliminarAficionesSeleccionadas, openIndexedDB);
+
+                                            })
+                                            .catch((error) => {
+                                                content.innerHTML = `<p>Error: ${error.message}</p>`;
+                                            });
+                            })
+                            .catch((error) => {
+                                console.error(error);
+                                alert(error); // Mostrar el error
+                            });
+                    })
+                    .catch(error => {
+                        console.error("Error al abrir IndexedDB:", error);
+                        alert("Error al abrir IndexedDB: " + error); // Mostrar un error si no se puede abrir IndexedDB
+                    });
+            }
+
+            // Función para crear los checkboxes de las aficiones seleccionadas
+            function crearCheckboxes(aficiones, container) {
+                aficiones.forEach(aficion => {
                     const checkboxDiv = document.createElement("div");
                     checkboxDiv.classList.add("col-6", "mb-2");
 
@@ -734,79 +801,17 @@ export function eliminarAficion(obtenerAficionesUsuarioDesdeIndexedDB, openIndex
 
                     checkboxDiv.appendChild(checkbox);
                     checkboxDiv.appendChild(label);
-                    checkboxContainer.appendChild(checkboxDiv);
+                    container.appendChild(checkboxDiv);
                 });
-
-                // Mostrar el botón para eliminar aficiones
-                eliminarAficionesButton.style.display = "block";
-
-                // Limpiar eventos previos del botón
-                eliminarAficionesButton.replaceWith(eliminarAficionesButton.cloneNode(true));
-                const nuevoEliminarButton = document.getElementById("eliminarAficionesButton");
-
-                // Registrar evento para eliminar las aficiones seleccionadas
-                nuevoEliminarButton.addEventListener("click", () => {
-                    const checkboxes = checkboxContainer.querySelectorAll("input[type='checkbox']");
-                    const seleccionadas = Array.from(checkboxes)
-                            .filter(checkbox => checkbox.checked)
-                            .map(checkbox => Number(checkbox.value)); // Convertir valores a números
-
-                    if (seleccionadas.length === 0) {
-                        alert("No has seleccionado ninguna afición para eliminar.");
-                        return;
-                    }
-
-                    openIndexedDB().then(db => {
-                        const transaction = db.transaction("usuario_aficion", "readwrite");
-                        const store = transaction.objectStore("usuario_aficion");
-
-                        // Obtener las aficiones existentes del usuario
-                        const existingRequest = store.getAll();
-                        existingRequest.onsuccess = () => {
-                            const existingAficiones = existingRequest.result.filter(item => item.email === emailUsuario);
-                            const existingIds = existingAficiones.map(item => Number(item.idAficion));
-
-                            // Filtrar las aficiones seleccionadas que se deben eliminar
-                            const aficionesAEliminar = seleccionadas.filter(idAficion => existingIds.includes(idAficion));
-
-                            if (aficionesAEliminar.length === 0) {
-                                alert("No has seleccionado aficiones válidas para eliminar.");
-                                return;
-                            }
-
-                            // Eliminar las aficiones seleccionadas
-                            aficionesAEliminar.forEach(idAficion => {
-                                const request = store.delete(idAficion); // Eliminar por id
-                                request.onsuccess = () => {
-                                    console.log(`Afición con ID ${idAficion} eliminada.`);
-                                };
-                                request.onerror = event => {
-                                    console.error(`Error al eliminar la afición con ID ${idAficion}:`, event.target.error);
-                                };
-                            });
-
-                            transaction.oncomplete = () => {
-                                alert("¡Aficiones eliminadas exitosamente!");
-                                cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, document.getElementById("main"));
-                            };
-
-                            transaction.onerror = event => {
-                                console.error("Error al eliminar aficiones en IndexedDB:", event.target.error);
-                            };
-                        };
-
-                        existingRequest.onerror = event => {
-                            console.error("Error al obtener las aficiones existentes del usuario:", event.target.error);
-                        };
-                    }).catch(error => {
-                        console.error("Error al abrir IndexedDB:", error);
-                    });
-                });
-            })
-            .catch(error => {
-                console.error("Error al cargar las aficiones del usuario:", error);
-            });
+            }
+        })
+        .catch(error => {
+            console.error("Error al cargar las aficiones:", error);
+        });
 }
+
+
+
 
 export function initMap(openIndexedDB, obtenerUsuariosDesdeIndexedDB) {
     const mapContainer = document.getElementById("mapContainer");

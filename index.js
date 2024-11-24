@@ -1,5 +1,5 @@
-import {cargarLikes,loadUserProfile, login, buscar, cargarFotoYMensajeBienvenida, cargarAficiones, añadirAficion, eliminarAficion, initMap} from "./js/funciones.js";
-import {openIndexedDB,añadirAficionesSeleccionadas, cargarYAlmacenarDatos, obtenerUsuariosDesdeIndexedDB, obtenerLikesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, obtenerAficionesDesdeIndexedDB} from "./js/bd.js";
+import {cargarLikes,loadUserProfile, login, buscar, cargarFotoYMensajeBienvenida, cargarAficiones, añadirAficion, eliminarAficiones, initMap} from "./js/funciones.js";
+import {openIndexedDB,añadirAficionesSeleccionadas,eliminarAficionesSeleccionadas, cargarYAlmacenarDatos, obtenerUsuariosDesdeIndexedDB, obtenerLikesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, obtenerAficionesDesdeIndexedDB} from "./js/bd.js";
 // Objeto para almacenar las páginas cargadas
 const cache = {};
 
@@ -158,7 +158,7 @@ function loadPaginaUsuario() {
                                 }
                                 if (view === "html/eliminarAficion.html") {
                                                 console.log(view);
-                                                eliminarAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, openIndexedDB);
+                                                eliminarAficiones(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, eliminarAficionesSeleccionadas, openIndexedDB);
                                 }
                                 if (view === "html/geolocalizacion.html") {
                                                 console.log(view);
@@ -194,7 +194,7 @@ function loadPaginaUsuario() {
                                             }
                                             if (view === "html/eliminarAficion.html") {
                                                 console.log(view);
-                                                eliminarAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, openIndexedDB);
+                                                eliminarAficiones(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, eliminarAficionesSeleccionadas, openIndexedDB);
                                             }
                                             if (view === "html/geolocalizacion.html") {
                                                 console.log(view);
