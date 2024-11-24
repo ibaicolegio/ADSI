@@ -326,3 +326,64 @@ export function eliminarAficionesSeleccionadas(db, emailUsuario, aficionesSelecc
         };
     });
 }
+
+
+
+// Función para actualizar el perfil del usuario en IndexedDB
+export function actualizarUsuarioEnIndexedDB(db, usuario) {
+    return new Promise((resolve, reject) => {
+        // Verificar si el usuario tiene un email y datos válidos
+        if (!usuario || !usuario.email) {
+            reject("El usuario no tiene email o datos válidos.");
+            return;
+        }
+
+        // Abrir IndexedDB utilizando la función openIndexedDB
+        openIndexedDB().then((db) => {
+            const transaction = db.transaction('usuarios', 'readwrite');
+            const objectStore = transaction.objectStore('usuarios');
+
+            // Obtener el usuario actual de IndexedDB
+            const request = objectStore.get(usuario.email);
+            console.log('Solicitud de obtención de usuario:', request);
+
+            request.onsuccess = function () {
+                const user = request.result;
+
+                if (user) {
+                    // Mostrar el usuario actual antes de la actualización
+                    console.log("Usuario encontrado:", user);
+
+                    // Actualizar los datos del usuario con la nueva foto y ciudad
+                    user.foto = usuario.foto;
+                    user.ciudad = usuario.ciudad;
+
+                    // Guardar los cambios en IndexedDB
+                    const updateRequest = objectStore.put(user);
+
+                    updateRequest.onsuccess = function () {
+                        console.log("Perfil del usuario actualizado exitosamente en IndexedDB.");
+                        resolve("Perfil actualizado exitosamente.");
+                    };
+
+                    updateRequest.onerror = function (event) {
+                        console.error("Error al actualizar el perfil en IndexedDB", event);
+                        reject(`Error al actualizar el perfil en IndexedDB: ${event.target.error}`);
+                    };
+                } else {
+                    reject("Usuario no encontrado en IndexedDB.");
+                }
+            };
+
+            request.onerror = function (event) {
+                console.error("Error al acceder al usuario en IndexedDB", event);
+                reject(`Error al acceder al usuario en IndexedDB: ${event.target.error}`);
+            };
+        }).catch((error) => {
+            console.error("Error al abrir la base de datos IndexedDB:", error);
+            reject("Error al abrir la base de datos IndexedDB.");
+        });
+    });
+}
+
+

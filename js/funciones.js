@@ -183,51 +183,51 @@ export function login(obtenerUsuariosDesdeIndexedDB) {
 export function loadUserProfile(obtenerUsuariosDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, emailUsuario) {
     // Primero, obtenemos los usuarios desde IndexedDB
     obtenerUsuariosDesdeIndexedDB()
-        .then((usuarios) => {
-            // Buscar al usuario con el email especificado
-            const user = usuarios.find(u => u.email === emailUsuario);
-            console.log(user);
-            if (user) {
-                // Rellenar los datos del perfil
-                document.getElementById("userName").textContent = `Nombre: ${user.nombre}`;
-                document.getElementById("userAge").textContent = `Edad: ${user.edad}`;
-                document.getElementById("userCity").textContent = `Ciudad: ${user.ciudad}`;
+            .then((usuarios) => {
+                // Buscar al usuario con el email especificado
+                const user = usuarios.find(u => u.email === emailUsuario);
+                console.log(user);
+                if (user) {
+                    // Rellenar los datos del perfil
+                    document.getElementById("userName").textContent = `Nombre: ${user.nombre}`;
+                    document.getElementById("userAge").textContent = `Edad: ${user.edad}`;
+                    document.getElementById("userCity").textContent = `Ciudad: ${user.ciudad}`;
 
-                // Si la foto está en Base64, la asignamos al atributo src del img
-                if (user.foto) {
-                    document.getElementById("userImage").src = `data:image/jpeg;base64,${user.foto}`;
+                    // Si la foto está en Base64, la asignamos al atributo src del img
+                    if (user.foto) {
+                        document.getElementById("userImage").src = `data:image/jpeg;base64,${user.foto}`;
+                    } else {
+                        // Si no hay foto, se asigna una imagen por defecto
+                        document.getElementById("userImage").src = "https://via.placeholder.com/100";
+                    }
+
+                    // Mostrar el mapa con la ubicación del usuario
+                    if (user.lat && user.lng) {
+                        showUserLocationOnMap(user.lat, user.lng);
+                    } else {
+                        console.warn("El usuario no tiene coordenadas disponibles.");
+                    }
+
+                    // Obtener las aficiones del usuario
+                    return obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario);
                 } else {
-                    // Si no hay foto, se asigna una imagen por defecto
-                    document.getElementById("userImage").src = "https://via.placeholder.com/100";
+                    throw new Error("Usuario no encontrado.");
                 }
-
-                // Mostrar el mapa con la ubicación del usuario
-                if (user.lat && user.lng) {
-                    showUserLocationOnMap(user.lat, user.lng);
-                } else {
-                    console.warn("El usuario no tiene coordenadas disponibles.");
-                }
-
-                // Obtener las aficiones del usuario
-                return obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario);
-            } else {
-                throw new Error("Usuario no encontrado.");
-            }
-        })
-        .then((aficiones) => {
-            // Rellenar las aficiones
-            const hobbiesList = document.getElementById("userHobbies");
-            hobbiesList.innerHTML = ""; // Limpiar la lista de aficiones antes de llenarla
-            aficiones.forEach((aficion) => {
-                const li = document.createElement("li");
-                li.textContent = aficion.nombre;
-                hobbiesList.appendChild(li);
+            })
+            .then((aficiones) => {
+                // Rellenar las aficiones
+                const hobbiesList = document.getElementById("userHobbies");
+                hobbiesList.innerHTML = ""; // Limpiar la lista de aficiones antes de llenarla
+                aficiones.forEach((aficion) => {
+                    const li = document.createElement("li");
+                    li.textContent = aficion.nombre;
+                    hobbiesList.appendChild(li);
+                });
+            })
+            .catch((error) => {
+                console.error("Error al cargar el perfil:", error);
+                alert("Error al cargar el perfil.");
             });
-        })
-        .catch((error) => {
-            console.error("Error al cargar el perfil:", error);
-            alert("Error al cargar el perfil.");
-        });
 }
 
 // Función para mostrar el mapa con la ubicación del usuario
@@ -241,13 +241,13 @@ function showUserLocationOnMap(lat, lng) {
 
     // Crear un mapa centrado en las coordenadas del usuario
     const map = new google.maps.Map(mapContainer, {
-        center: { lat, lng },
+        center: {lat, lng},
         zoom: 14,
     });
 
     // Añadir un marcador en la ubicación del usuario
     new google.maps.Marker({
-        position: { lat, lng },
+        position: {lat, lng},
         map: map,
         title: "Ubicación del usuario",
     });
@@ -715,99 +715,99 @@ export function eliminarAficiones(obtenerAficionesDesdeIndexedDB, obtenerAficion
         obtenerAficionesDesdeIndexedDB(), // Todas las aficiones disponibles
         obtenerAficionesUsuarioDesdeIndexedDB(emailUsuario) // Aficiones seleccionadas por el usuario
     ])
-        .then(([todasAficiones, aficionesUsuario]) => {
-            console.log("Todas las aficiones disponibles:", todasAficiones);
-            console.log("Aficiones del usuario:", aficionesUsuario);
+            .then(([todasAficiones, aficionesUsuario]) => {
+                console.log("Todas las aficiones disponibles:", todasAficiones);
+                console.log("Aficiones del usuario:", aficionesUsuario);
 
-            // Obtener las aficiones que el usuario tiene seleccionadas
-            const idsAficionesUsuario = aficionesUsuario.map(aficion => Number(aficion.idAficion));
-            const aficionesSeleccionadas = todasAficiones.filter(aficion => idsAficionesUsuario.includes(Number(aficion.idAficion)));
+                // Obtener las aficiones que el usuario tiene seleccionadas
+                const idsAficionesUsuario = aficionesUsuario.map(aficion => Number(aficion.idAficion));
+                const aficionesSeleccionadas = todasAficiones.filter(aficion => idsAficionesUsuario.includes(Number(aficion.idAficion)));
 
-            if (aficionesSeleccionadas.length === 0) {
-                checkboxContainer.innerHTML = "<p>No tienes aficiones seleccionadas para eliminar.</p>";
-                eliminarAficionesButton.style.display = "none"; // Ocultar el botón si no hay aficiones
-                return;
-            }
-
-            crearCheckboxes(aficionesSeleccionadas, checkboxContainer);
-
-            eliminarAficionesButton.style.display = "block"; // Mostrar el botón
-
-            // Eliminar cualquier evento anterior y agregar el nuevo
-            eliminarAficionesButton.removeEventListener("click", eliminarAficionesEventHandler);
-            eliminarAficionesButton.addEventListener("click", eliminarAficionesEventHandler);
-
-            function eliminarAficionesEventHandler() {
-                const checkboxes = checkboxContainer.querySelectorAll("input[type='checkbox']");
-                const seleccionadas = Array.from(checkboxes)
-                    .filter(checkbox => checkbox.checked)
-                    .map(checkbox => Number(checkbox.value)); // Convertir valores a números
-
-                if (seleccionadas.length === 0) {
-                    alert("No has seleccionado ninguna afición para eliminar.");
+                if (aficionesSeleccionadas.length === 0) {
+                    checkboxContainer.innerHTML = "<p>No tienes aficiones seleccionadas para eliminar.</p>";
+                    eliminarAficionesButton.style.display = "none"; // Ocultar el botón si no hay aficiones
                     return;
                 }
-                console.log(seleccionadas);
 
-                // Abrir IndexedDB y eliminar las aficiones seleccionadas
-                openIndexedDB()
-                    .then(db => {
-                        eliminarAficionesSeleccionadas(db, emailUsuario, seleccionadas)
-                            .then((mensaje) => {
-                                alert(mensaje); // Mostrar el mensaje de éxito
-                                const content = document.getElementById("main");
-                                    fetch("./html/eliminarAficion.html")
-                                            .then((response) => {
-                                                if (!response.ok)
-                                                    throw new Error("Página no encontrada.");
-                                                return response.text();
-                                            })
-                                            .then((html) => {
-                                                content.innerHTML = html;
-                                                eliminarAficiones(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, eliminarAficionesSeleccionadas, openIndexedDB);
+                crearCheckboxes(aficionesSeleccionadas, checkboxContainer);
 
-                                            })
-                                            .catch((error) => {
-                                                content.innerHTML = `<p>Error: ${error.message}</p>`;
-                                            });
+                eliminarAficionesButton.style.display = "block"; // Mostrar el botón
+
+                // Eliminar cualquier evento anterior y agregar el nuevo
+                eliminarAficionesButton.removeEventListener("click", eliminarAficionesEventHandler);
+                eliminarAficionesButton.addEventListener("click", eliminarAficionesEventHandler);
+
+                function eliminarAficionesEventHandler() {
+                    const checkboxes = checkboxContainer.querySelectorAll("input[type='checkbox']");
+                    const seleccionadas = Array.from(checkboxes)
+                            .filter(checkbox => checkbox.checked)
+                            .map(checkbox => Number(checkbox.value)); // Convertir valores a números
+
+                    if (seleccionadas.length === 0) {
+                        alert("No has seleccionado ninguna afición para eliminar.");
+                        return;
+                    }
+                    console.log(seleccionadas);
+
+                    // Abrir IndexedDB y eliminar las aficiones seleccionadas
+                    openIndexedDB()
+                            .then(db => {
+                                eliminarAficionesSeleccionadas(db, emailUsuario, seleccionadas)
+                                        .then((mensaje) => {
+                                            alert(mensaje); // Mostrar el mensaje de éxito
+                                            const content = document.getElementById("main");
+                                            fetch("./html/eliminarAficion.html")
+                                                    .then((response) => {
+                                                        if (!response.ok)
+                                                            throw new Error("Página no encontrada.");
+                                                        return response.text();
+                                                    })
+                                                    .then((html) => {
+                                                        content.innerHTML = html;
+                                                        eliminarAficiones(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, eliminarAficionesSeleccionadas, openIndexedDB);
+
+                                                    })
+                                                    .catch((error) => {
+                                                        content.innerHTML = `<p>Error: ${error.message}</p>`;
+                                                    });
+                                        })
+                                        .catch((error) => {
+                                            console.error(error);
+                                            alert(error); // Mostrar el error
+                                        });
                             })
-                            .catch((error) => {
-                                console.error(error);
-                                alert(error); // Mostrar el error
+                            .catch(error => {
+                                console.error("Error al abrir IndexedDB:", error);
+                                alert("Error al abrir IndexedDB: " + error); // Mostrar un error si no se puede abrir IndexedDB
                             });
-                    })
-                    .catch(error => {
-                        console.error("Error al abrir IndexedDB:", error);
-                        alert("Error al abrir IndexedDB: " + error); // Mostrar un error si no se puede abrir IndexedDB
+                }
+
+                // Función para crear los checkboxes de las aficiones seleccionadas
+                function crearCheckboxes(aficiones, container) {
+                    aficiones.forEach(aficion => {
+                        const checkboxDiv = document.createElement("div");
+                        checkboxDiv.classList.add("col-6", "mb-2");
+
+                        const checkbox = document.createElement("input");
+                        checkbox.type = "checkbox";
+                        checkbox.id = `aficion-${aficion.idAficion}`;
+                        checkbox.value = aficion.idAficion;
+                        checkbox.classList.add("form-check-input");
+
+                        const label = document.createElement("label");
+                        label.htmlFor = `aficion-${aficion.idAficion}`;
+                        label.classList.add("form-check-label");
+                        label.textContent = aficion.nombreAficion;
+
+                        checkboxDiv.appendChild(checkbox);
+                        checkboxDiv.appendChild(label);
+                        container.appendChild(checkboxDiv);
                     });
             }
-
-            // Función para crear los checkboxes de las aficiones seleccionadas
-            function crearCheckboxes(aficiones, container) {
-                aficiones.forEach(aficion => {
-                    const checkboxDiv = document.createElement("div");
-                    checkboxDiv.classList.add("col-6", "mb-2");
-
-                    const checkbox = document.createElement("input");
-                    checkbox.type = "checkbox";
-                    checkbox.id = `aficion-${aficion.idAficion}`;
-                    checkbox.value = aficion.idAficion;
-                    checkbox.classList.add("form-check-input");
-
-                    const label = document.createElement("label");
-                    label.htmlFor = `aficion-${aficion.idAficion}`;
-                    label.classList.add("form-check-label");
-                    label.textContent = aficion.nombreAficion;
-
-                    checkboxDiv.appendChild(checkbox);
-                    checkboxDiv.appendChild(label);
-                    container.appendChild(checkboxDiv);
-                });
-            }
-        })
-        .catch(error => {
-            console.error("Error al cargar las aficiones:", error);
-        });
+            })
+            .catch(error => {
+                console.error("Error al cargar las aficiones:", error);
+            });
 }
 
 
@@ -823,50 +823,50 @@ export function initMap(openIndexedDB, obtenerUsuariosDesdeIndexedDB) {
     }
 
     navigator.geolocation.getCurrentPosition(
-        (position) => {
-            const userLocation = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-            };
+            (position) => {
+        const userLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+        };
 
-            // Crear el mapa centrado en la ubicación del usuario
-            const map = new google.maps.Map(mapContainer, {
-                center: userLocation,
-                zoom: 14,
-            });
+        // Crear el mapa centrado en la ubicación del usuario
+        const map = new google.maps.Map(mapContainer, {
+            center: userLocation,
+            zoom: 14,
+        });
 
-            // Crear un círculo inicial
-            const circle = new google.maps.Circle({
-                map: map,
-                center: userLocation,
-                radius: 1000, // Radio inicial: 1 km
-                fillColor: "#FF0000",
-                fillOpacity: 0.35,
-                strokeColor: "#FF0000",
-                strokeOpacity: 0.8,
-                strokeWeight: 2,
-                draggable: false, // Asegurarse de que el círculo no se pueda mover
-            });
+        // Crear un círculo inicial
+        const circle = new google.maps.Circle({
+            map: map,
+            center: userLocation,
+            radius: 1000, // Radio inicial: 1 km
+            fillColor: "#FF0000",
+            fillOpacity: 0.35,
+            strokeColor: "#FF0000",
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            draggable: false, // Asegurarse de que el círculo no se pueda mover
+        });
 
-            // No mover el círculo ni cambiar su centro al interactuar con el mapa
-            map.addListener("center_changed", () => {
-                // No hacer nada aquí
-            });
+        // No mover el círculo ni cambiar su centro al interactuar con el mapa
+        map.addListener("center_changed", () => {
+            // No hacer nada aquí
+        });
 
-            // Permitir cambiar el radio con el control deslizante
-            const rangeInput = document.getElementById("range");
-            const rangeValue = document.getElementById("rangeValue");
+        // Permitir cambiar el radio con el control deslizante
+        const rangeInput = document.getElementById("range");
+        const rangeValue = document.getElementById("rangeValue");
 
-            rangeInput.addEventListener("input", () => {
-                const radiusInKm = parseFloat(rangeInput.value);
-                circle.setRadius(radiusInKm * 1000); // Convertir km a metros
-                rangeValue.textContent = `${radiusInKm} km`; // Actualizar el valor del radio
-                // Actualizar marcadores después de cambiar el radio
-                actualizarMarcadores(map, circle, obtenerUsuariosDesdeIndexedDB);
-            });
+        rangeInput.addEventListener("input", () => {
+            const radiusInKm = parseFloat(rangeInput.value);
+            circle.setRadius(radiusInKm * 1000); // Convertir km a metros
+            rangeValue.textContent = `${radiusInKm} km`; // Actualizar el valor del radio
+            // Actualizar marcadores después de cambiar el radio
+            actualizarMarcadores(map, circle, obtenerUsuariosDesdeIndexedDB);
+        });
 
-            // Cargar la base de datos IndexedDB
-            openIndexedDB()
+        // Cargar la base de datos IndexedDB
+        openIndexedDB()
                 .then(() => {
                     // Cargar y actualizar los marcadores iniciales
                     actualizarMarcadores(map, circle, obtenerUsuariosDesdeIndexedDB);
@@ -874,62 +874,62 @@ export function initMap(openIndexedDB, obtenerUsuariosDesdeIndexedDB) {
                 .catch((error) => {
                     console.error("Error al abrir la base de datos:", error);
                 });
-        },
-        (error) => {
-            console.error("Error obteniendo la ubicación:", error.message);
-            mapContainer.innerHTML = `<p>No se pudo obtener la ubicación. Verifica los permisos de ubicación en tu navegador.</p>`;
-        }
+    },
+            (error) => {
+        console.error("Error obteniendo la ubicación:", error.message);
+        mapContainer.innerHTML = `<p>No se pudo obtener la ubicación. Verifica los permisos de ubicación en tu navegador.</p>`;
+    }
     );
 }
 
 function actualizarMarcadores(map, circle, obtenerUsuariosDesdeIndexedDB) {
     obtenerUsuariosDesdeIndexedDB()
-        .then((usuarios) => {
-            // Limpiar marcadores existentes
-            if (map.markers) {
-                map.markers.forEach(marker => marker.setMap(null));
-            }
-            map.markers = [];
+            .then((usuarios) => {
+                // Limpiar marcadores existentes
+                if (map.markers) {
+                    map.markers.forEach(marker => marker.setMap(null));
+                }
+                map.markers = [];
 
-            const circleCenter = circle.getCenter();
-            const circleRadius = circle.getRadius();
+                const circleCenter = circle.getCenter();
+                const circleRadius = circle.getRadius();
 
-            usuarios.forEach((usuario) => {
-                const usuarioUbicacion = new google.maps.LatLng(usuario.lat, usuario.lng);
+                usuarios.forEach((usuario) => {
+                    const usuarioUbicacion = new google.maps.LatLng(usuario.lat, usuario.lng);
 
-                // Comprobar si el usuario está dentro del círculo
-                if (google.maps.geometry.spherical.computeDistanceBetween(circleCenter, usuarioUbicacion) <= circleRadius) {
-                    // Crear un marcador para el usuario
-                    const marker = new google.maps.Marker({
-                        position: usuarioUbicacion,
-                        map: map,
-                        title: usuario.nombre
-                    });
+                    // Comprobar si el usuario está dentro del círculo
+                    if (google.maps.geometry.spherical.computeDistanceBetween(circleCenter, usuarioUbicacion) <= circleRadius) {
+                        // Crear un marcador para el usuario
+                        const marker = new google.maps.Marker({
+                            position: usuarioUbicacion,
+                            map: map,
+                            title: usuario.nombre
+                        });
 
-                    // Crear una ventana de información para mostrar más detalles
-                    const infoWindow = new google.maps.InfoWindow({
-                        content: `
+                        // Crear una ventana de información para mostrar más detalles
+                        const infoWindow = new google.maps.InfoWindow({
+                            content: `
                             <p><strong>${usuario.nombre}</strong></p>
                             <p>Edad: ${usuario.edad}</p>
                         `
-                    });
+                        });
 
-                    // Mostrar la información al hacer clic en el marcador
-                    marker.addListener("click", () => {
-                        infoWindow.open(map, marker);
-                    });
+                        // Mostrar la información al hacer clic en el marcador
+                        marker.addListener("click", () => {
+                            infoWindow.open(map, marker);
+                        });
 
-                    // Agregar el marcador a la lista
-                    map.markers.push(marker);
-                }
+                        // Agregar el marcador a la lista
+                        map.markers.push(marker);
+                    }
+                });
+            })
+            .catch((error) => {
+                console.error("Error obteniendo usuarios desde IndexedDB:", error);
             });
-        })
-        .catch((error) => {
-            console.error("Error obteniendo usuarios desde IndexedDB:", error);
-        });
 }
 
-export function modificarPerfil() {
+export function modificarPerfil(db, actualizarUsuarioEnIndexedDB,obtenerUsuariosDesdeIndexedDB) {
     const form = document.getElementById("localStorageForm");
     const profilePhotoInput = document.getElementById("profilePhoto");
     const citySelect = document.getElementById("citySelect");
@@ -949,7 +949,7 @@ export function modificarPerfil() {
 
     // Mostrar la imagen actual si ya existe
     if (userLoggedIn.foto) {
-        mostrarImagenEnInput(userLoggedIn.foto);
+        mostrarImagenEnInput("data:image/jpeg;base64," + userLoggedIn.foto);
     }
 
     // Preseleccionar la ciudad del usuario
@@ -988,10 +988,18 @@ export function modificarPerfil() {
         sessionStorage.setItem("userLoggedIn", JSON.stringify(userLoggedIn));
     });
 
-    // Manejar el envío del formulario (opcional, si necesitas enviar datos o validar algo)
+    // Manejar el envío del formulario (cuando el usuario presione "Guardar")
     form.addEventListener("submit", function (event) {
         event.preventDefault();
-        alert("Cambios guardados exitosamente.");
+
+        // Actualizar el perfil del usuario en IndexedDB
+        actualizarUsuarioEnIndexedDB(db, userLoggedIn).then(() => {
+            alert("Cambios guardados exitosamente.");
+        }).catch((error) => {
+            console.error("Error al guardar los cambios:", error);
+            alert("Hubo un problema al guardar los cambios.");
+        });
+        cargarFotoYMensajeBienvenida(obtenerUsuariosDesdeIndexedDB);
     });
 }
 
