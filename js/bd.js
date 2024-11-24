@@ -268,28 +268,30 @@ export function añadirAficionesSeleccionadas(db, emailUsuario, aficionesSelecci
     // Convertir un array u objeto a string
     const aficionesSeleccionadasString = JSON.stringify(aficionesSeleccionadas);
     console.log(aficionesSeleccionadasString);
+
     return new Promise((resolve, reject) => {
         console.log(emailUsuario + "----" + aficionesSeleccionadas);
+
         // Verificar si aficionesSeleccionadas es un array válido y contiene elementos
         if (!Array.isArray(aficionesSeleccionadas) || aficionesSeleccionadas.length === 0) {
             reject("No se han seleccionado aficiones.");
             return;
         }
 
-        // Crear un array de registros con las aficiones seleccionadas
+        // Crear un array de registros con las aficiones seleccionadas, asegurándonos de que idAficion sea una cadena
         const registros = aficionesSeleccionadas.map((idAficion) => ({
-                email: emailUsuario,
-                idAficion: idAficion
-            }));
+            email: emailUsuario,
+            idAficion: String(idAficion)  // Convertir idAficion a cadena
+        }));
 
         // Usar la función insertarEnIndexedDB para insertar los registros en la tienda 'usuario_aficion'
         insertarEnIndexedDB(db, 'usuario_aficion', registros)
-                .then(() => {
-                    resolve("¡Aficiones añadidas exitosamente!");
-                })
-                .catch((error) => {
-                    reject(`Error al guardar aficiones en IndexedDB: ${error}`);
-                });
+            .then(() => {
+                resolve("¡Aficiones añadidas exitosamente!");
+            })
+            .catch((error) => {
+                reject(`Error al guardar aficiones en IndexedDB: ${error}`);
+            });
     });
 }
 
