@@ -152,8 +152,8 @@ export function cargarLikes(obtenerLikesDesdeIndexedDB, obtenerUsuariosDesdeInde
                             No tienes "Matches" aún.
                         </div>
                     `;
-                        // Si no hay "me gusta" filtrados, mostrar un mensaje
-                        likesContainer.innerHTML = `
+                    // Si no hay "me gusta" filtrados, mostrar un mensaje
+                    likesContainer.innerHTML = `
                         <div class="alert alert-warning text-center" role="alert">
                             No tienes "Likes" aún.
                         </div>
@@ -401,12 +401,12 @@ export async function buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesd
                     const hasSelectedAficion = selectedAficiones.length === 0 || userAficiones.some(aficion => selectedAficiones.includes(aficion.nombre));
 
                     return (
-                        (!genero || generoValue.includes(user.genero)) &&
-                        (!isNaN(minAge) && user.edad >= minAge) &&
-                        (!isNaN(maxAge) && user.edad <= maxAge) &&
-                        (!ciudad || userCiudad === ciudad) &&
-                        hasSelectedAficion
-                    ) ? user : null;
+                            (!genero || generoValue.includes(user.genero)) &&
+                            (!isNaN(minAge) && user.edad >= minAge) &&
+                            (!isNaN(maxAge) && user.edad <= maxAge) &&
+                            (!ciudad || userCiudad === ciudad) &&
+                            hasSelectedAficion
+                            ) ? user : null;
                 }));
 
                 // Filtrar los resultados nulos
@@ -440,6 +440,15 @@ export async function buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesd
                         searchResultsContainer.appendChild(userCard);
                     });
 
+                    const isAuthenticated = sessionStorage.getItem("userLoggedIn");
+                    if (!isAuthenticated) {
+                        const userImages = document.querySelectorAll('img.user-image'); // Seleccionar solo imágenes de usuarios
+                        userImages.forEach(img => {
+                            img.style.filter = 'blur(5px)'; // Aplica el desenfoque
+                        });
+                    }
+
+
                     // Agregar evento a los botones "Ver perfil"
                     const viewProfileButtons = document.querySelectorAll("#viewProfileButton");
                     viewProfileButtons.forEach(button => {
@@ -454,26 +463,26 @@ export async function buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesd
                             const isAuthenticated = sessionStorage.getItem("userLoggedIn");
                             if (!isAuthenticated) {
                                 fetch("./html/login.html")
-                                    .then((response) => response.text())
-                                    .then((html) => {
-                                        content.innerHTML = html;
-                                        login(obtenerUsuariosDesdeIndexedDB);
-                                    })
-                                    .catch((error) => {
-                                        content.innerHTML = `<p>Error: ${error.message}</p>`;
-                                    });
-                            } else {
-                                const isSelectedUserEmail = sessionStorage.getItem("selectedUserEmail");
-                                if (isSelectedUserEmail) {
-                                    fetch("./html/verPerfil.html")
                                         .then((response) => response.text())
                                         .then((html) => {
                                             content.innerHTML = html;
-                                            loadUserProfile(obtenerUsuariosDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, isSelectedUserEmail);
+                                            login(obtenerUsuariosDesdeIndexedDB);
                                         })
                                         .catch((error) => {
                                             content.innerHTML = `<p>Error: ${error.message}</p>`;
                                         });
+                            } else {
+                                const isSelectedUserEmail = sessionStorage.getItem("selectedUserEmail");
+                                if (isSelectedUserEmail) {
+                                    fetch("./html/verPerfil.html")
+                                            .then((response) => response.text())
+                                            .then((html) => {
+                                                content.innerHTML = html;
+                                                loadUserProfile(obtenerUsuariosDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, isSelectedUserEmail);
+                                            })
+                                            .catch((error) => {
+                                                content.innerHTML = `<p>Error: ${error.message}</p>`;
+                                            });
                                 }
                             }
                         });
