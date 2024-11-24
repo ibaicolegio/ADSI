@@ -1,4 +1,4 @@
-import {cargarLikes, loadUserProfile, login, buscar, cargarFotoYMensajeBienvenida, cargarAficiones, añadirAficion, eliminarAficiones, initMap} from "./js/funciones.js";
+import {cargarLikes, loadUserProfile, login, buscar, cargarFotoYMensajeBienvenida, cargarAficiones, añadirAficion, eliminarAficiones, initMap, modificarPerfil} from "./js/funciones.js";
 import {openIndexedDB, añadirAficionesSeleccionadas, eliminarAficionesSeleccionadas, cargarYAlmacenarDatos, obtenerUsuariosDesdeIndexedDB, obtenerLikesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, obtenerAficionesDesdeIndexedDB} from "./js/bd.js";
 // Objeto para almacenar las páginas cargadas
 const cache = {};
