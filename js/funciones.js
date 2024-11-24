@@ -929,3 +929,93 @@ function actualizarMarcadores(map, circle, obtenerUsuariosDesdeIndexedDB) {
         });
 }
 
+export function modificarPerfil() {
+    const form = document.getElementById("localStorageForm");
+    const profilePhotoInput = document.getElementById("profilePhoto");
+    const citySelect = document.getElementById("citySelect");
+
+    if (!form || !profilePhotoInput || !citySelect) {
+        console.error("Formulario o elementos no encontrados en el DOM.");
+        return;
+    }
+
+    // Obtener el usuario actualmente logueado desde sessionStorage
+    const userLoggedIn = JSON.parse(sessionStorage.getItem("userLoggedIn"));
+
+    if (!userLoggedIn) {
+        console.error("No hay usuario logueado.");
+        return;
+    }
+
+    // Mostrar la imagen actual si ya existe
+    if (userLoggedIn.foto) {
+        mostrarImagenEnInput(userLoggedIn.foto);
+    }
+
+    // Preseleccionar la ciudad del usuario
+    if (userLoggedIn.ciudad) {
+        citySelect.value = userLoggedIn.ciudad;
+    }
+
+    // Manejar el cambio de imagen
+    profilePhotoInput.addEventListener("change", function (event) {
+        const file = event.target.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const base64Image = e.target.result;
+
+                // Mostrar la imagen seleccionada en el input
+                mostrarImagenEnInput(base64Image);
+
+                // Actualizar la foto en sessionStorage
+                userLoggedIn.foto = base64Image.split(",")[1]; // Guardar solo la parte Base64
+                sessionStorage.setItem("userLoggedIn", JSON.stringify(userLoggedIn));
+            };
+
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Manejar el cambio de ciudad
+    citySelect.addEventListener("change", function () {
+        const selectedCity = citySelect.value;
+
+        // Actualizar la ciudad en sessionStorage
+        userLoggedIn.ciudad = selectedCity;
+        sessionStorage.setItem("userLoggedIn", JSON.stringify(userLoggedIn));
+    });
+
+    // Manejar el envío del formulario (opcional, si necesitas enviar datos o validar algo)
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        alert("Cambios guardados exitosamente.");
+    });
+}
+
+// Función para mostrar la imagen en el lugar del nombre del archivo
+function mostrarImagenEnInput(base64Image) {
+    const profilePhotoInput = document.getElementById("profilePhoto");
+
+    // Crear una imagen para reemplazar el texto del input
+    const imagePreview = document.createElement("img");
+    imagePreview.src = base64Image;
+    imagePreview.alt = "Foto de perfil";
+    imagePreview.style.width = "150px";
+    imagePreview.style.height = "150px";
+    imagePreview.style.objectFit = "cover";
+    imagePreview.style.borderRadius = "50%";
+
+    // Reemplazar el texto del input
+    const parent = profilePhotoInput.parentElement;
+    const existingPreview = parent.querySelector("img");
+
+    if (existingPreview) {
+        existingPreview.replaceWith(imagePreview);
+    } else {
+        parent.appendChild(imagePreview);
+    }
+}
+

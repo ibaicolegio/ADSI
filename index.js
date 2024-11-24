@@ -1,5 +1,5 @@
-import {cargarLikes,loadUserProfile, login, buscar, cargarFotoYMensajeBienvenida, cargarAficiones, añadirAficion, eliminarAficiones, initMap} from "./js/funciones.js";
-import {openIndexedDB,añadirAficionesSeleccionadas,eliminarAficionesSeleccionadas, cargarYAlmacenarDatos, obtenerUsuariosDesdeIndexedDB, obtenerLikesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, obtenerAficionesDesdeIndexedDB} from "./js/bd.js";
+import {cargarLikes, loadUserProfile, login, buscar, cargarFotoYMensajeBienvenida, cargarAficiones, añadirAficion, eliminarAficiones, initMap} from "./js/funciones.js";
+import {openIndexedDB, añadirAficionesSeleccionadas, eliminarAficionesSeleccionadas, cargarYAlmacenarDatos, obtenerUsuariosDesdeIndexedDB, obtenerLikesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, obtenerAficionesDesdeIndexedDB} from "./js/bd.js";
 // Objeto para almacenar las páginas cargadas
 const cache = {};
 
@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (!isAuthenticated) {
         // Mostrar el login con su propio header
         loadPaginaPrincipal();
-        buscar(obtenerUsuariosDesdeIndexedDB,obtenerAficionesDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB);
+        buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB);
     } else {
         // Mostrar el contenido principal con el header general
         loadPaginaUsuario();
@@ -52,7 +52,7 @@ function loadPaginaPrincipal() {
                         content.innerHTML = cache[view];
                         if (view === "html/busqueda.html") {
                             console.log(view);
-                            buscar(obtenerUsuariosDesdeIndexedDB,obtenerAficionesDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB, content);
+                            buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, content);
                         }
                     } else {
                         fetch(view)
@@ -70,7 +70,7 @@ function loadPaginaPrincipal() {
                                     }
                                     if (view === "html/busqueda.html") {
                                         console.log(view);
-                                        buscar(obtenerUsuariosDesdeIndexedDB,obtenerAficionesDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB, content, view);
+                                        buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, content, view);
                                     }
                                 })
                                 .catch((error) => {
@@ -102,7 +102,7 @@ function loadPaginaUsuario() {
                             })
                             .then((html) => {
                                 content.innerHTML = html;
-                                loadUserProfile(obtenerUsuariosDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB,isSelectedUserEmail);
+                                loadUserProfile(obtenerUsuariosDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, isSelectedUserEmail);
                             })
                             .catch((error) => {
                                 content.innerHTML = `<p>Error: ${error.message}</p>`;
@@ -142,30 +142,34 @@ function loadPaginaUsuario() {
                                 content.innerHTML = cache[view];
                                 if (view === "html/verLikes.html") {
                                     console.log(view);
-                                    cargarLikes(obtenerLikesDesdeIndexedDB,obtenerUsuariosDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB);
+                                    cargarLikes(obtenerLikesDesdeIndexedDB, obtenerUsuariosDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB);
                                 }
                                 if (view === "html/busqueda.html") {
                                     console.log(view);
-                                    buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB, content);
+                                    buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, content);
                                 }
                                 if (view === "html/verAficion.html") {
-                                                console.log(view);
-                                                cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, content);
+                                    console.log(view);
+                                    cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, content);
                                 }
                                 if (view === "html/añadirAficion.html") {
-                                                console.log(view);
-                                                añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB,añadirAficionesSeleccionadas, openIndexedDB);
+                                    console.log(view);
+                                    añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, añadirAficionesSeleccionadas, openIndexedDB);
                                 }
                                 if (view === "html/eliminarAficion.html") {
-                                                console.log(view);
-                                                eliminarAficiones(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, eliminarAficionesSeleccionadas, openIndexedDB);
+                                    console.log(view);
+                                    eliminarAficiones(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, eliminarAficionesSeleccionadas, openIndexedDB);
                                 }
                                 if (view === "html/geolocalizacion.html") {
-                                                console.log(view);
-                                                initMap(openIndexedDB, obtenerUsuariosDesdeIndexedDB);
-                                            }
-                                            
-                            
+                                    console.log(view);
+                                    initMap(openIndexedDB, obtenerUsuariosDesdeIndexedDB);
+                                }
+                                if (view === "html/modificarPerfil.html") {
+                                    console.log(view);
+                                    modificarPerfil();
+                                }
+
+
                             } else {
                                 fetch(view)
                                         .then((response) => {
@@ -178,19 +182,19 @@ function loadPaginaUsuario() {
                                             content.innerHTML = html;
                                             if (view === "html/verLikes.html") {
                                                 console.log(view);
-                                                cargarLikes(obtenerLikesDesdeIndexedDB,obtenerUsuariosDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB);
+                                                cargarLikes(obtenerLikesDesdeIndexedDB, obtenerUsuariosDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB);
                                             }
                                             if (view === "html/busqueda.html") {
                                                 console.log(view);
-                                                buscar(obtenerUsuariosDesdeIndexedDB,obtenerAficionesDesdeIndexedDB,obtenerAficionesUsuarioDesdeIndexedDB, content);
+                                                buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, content);
                                             }
                                             if (view === "html/verAficion.html") {
                                                 console.log(view);
                                                 cargarAficiones(obtenerAficionesUsuarioDesdeIndexedDB, content);
                                             }
-                                           if (view === "html/añadirAficion.html") {
+                                            if (view === "html/añadirAficion.html") {
                                                 console.log(view);
-                                                añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB,añadirAficionesSeleccionadas, openIndexedDB);
+                                                añadirAficion(obtenerAficionesDesdeIndexedDB, obtenerAficionesUsuarioDesdeIndexedDB, añadirAficionesSeleccionadas, openIndexedDB);
                                             }
                                             if (view === "html/eliminarAficion.html") {
                                                 console.log(view);
@@ -200,7 +204,12 @@ function loadPaginaUsuario() {
                                                 console.log(view);
                                                 initMap(openIndexedDB, obtenerUsuariosDesdeIndexedDB);
                                             }
-                                            
+                                            if (view === "html/modificarPerfil.html") {
+                                                console.log(view);
+                                                modificarPerfil();
+                                            }
+
+
                                         })
                                         .catch((error) => {
                                             content.innerHTML = `<p>Error: ${error.message}</p>`;
