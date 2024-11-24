@@ -378,29 +378,27 @@ export async function buscar(obtenerUsuariosDesdeIndexedDB, obtenerAficionesDesd
                                 userCard.innerHTML = `
                                 <div class="card">
                                     <div class="card-body d-flex align-items-center">
-                                        <!-- Imagen del usuario a la derecha -->
                                         <div class="flex-grow-1">
-                                            <h5 class="card-title">${user.nombre}</h5>
-                                            <p class="card-text">Edad: ${user.edad}</p>
-                                            <p class="card-text">Ciudad: ${user.ciudad}</p>
-                                            <a href="#" id="viewProfileButton" class="btn btn-primary view-profile-button" data-email="${user.email}">Ver perfil</a>
-                                        </div>
-                                        <!-- Imagen en formato base64 -->
-                                        <img 
-                                            src="data:image/jpeg;base64,${user.foto}"
-                                            class="rounded-circle ms-3" 
-                                            style="width: 100px; height: 100px; object-fit: cover;">
+                                             <h5 class="card-title">${user.nombre}</h5>
+                                              <p class="card-text">Edad: ${user.edad}</p>
+                                              <p class="card-text">Ciudad: ${user.ciudad}</p>
+                                        <a href="#" id="viewProfileButton" class="btn btn-primary view-profile-button" data-email="${user.email}">Ver perfil</a>
                                     </div>
-                                </div>
+                                    <img 
+                                        src="data:image/jpeg;base64,${user.foto}" 
+                                        class="rounded-circle user-image ms-3" 
+                                        style="width: 100px; height: 100px; object-fit: cover;">
+                                    </div>
+                                  </div>
                             `;
                                 searchResultsContainer.appendChild(userCard);
                             });
 
                             const isAuthenticated = sessionStorage.getItem("userLoggedIn");
                             if (!isAuthenticated) {
-                                const images = document.querySelectorAll('img');
-                                images.forEach(img => {
-                                    img.style.filter = 'blur(5px)'; // Aplica el desenfoque de 5px
+                                const userImages = document.querySelectorAll('img.user-image'); // Seleccionar solo imágenes de usuarios
+                                userImages.forEach(img => {
+                                img.style.filter = 'blur(5px)'; // Aplica el desenfoque
                                 });
                             }
 
