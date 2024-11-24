@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // Verificar si el usuario está autenticado
     const isAuthenticated = sessionStorage.getItem("userLoggedIn");
-
+    const datos=sessionStorage.getItem("datosCargados");
     if (!isAuthenticated) {
         // Mostrar el login con su propio header
         loadPaginaPrincipal();
@@ -17,8 +17,12 @@ document.addEventListener("DOMContentLoaded", async function () {
         // Mostrar el contenido principal con el header general
         loadPaginaUsuario();
     }
-
-    cargarYAlmacenarDatos();
+    if(!datos){
+        cargarYAlmacenarDatos();
+        sessionStorage.setItem("datosCargados",true);
+    }
+    
+    
 
 });
 
